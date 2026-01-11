@@ -3,117 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BRILink Manager Pro</title>
+    <title>BRILink Manager Pro - Ultimate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     <style>
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); }
+        .money-font { font-family: 'Courier New', Courier, monospace; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen pb-20 md:pb-0">
+<body class="bg-slate-50 min-h-screen pb-20 md:pb-0">
 
-    <div id="modal-sesi" class="modal flex items-center justify-center p-4" style="display: flex;">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h2 class="text-xl font-bold mb-4 text-blue-700">Mulai Sesi Hari Ini</h2>
-            <p class="text-xs text-gray-500 mb-4">Sesuaikan saldo laci dan digital saat ini.</p>
-            <div class="space-y-3">
-                <input type="number" id="init-laci" placeholder="Saldo Laci Fisik" class="w-full p-3 border rounded-lg outline-none focus:border-blue-500">
-                <input type="number" id="init-bri" placeholder="Saldo Rekening BRI" class="w-full p-3 border rounded-lg outline-none focus:border-blue-500">
-                <input type="number" id="init-dana" placeholder="Saldo DANA" class="w-full p-3 border rounded-lg outline-none focus:border-blue-500">
-                <input type="number" id="init-pulsa" placeholder="Saldo Aplikasi Pulsa" class="w-full p-3 border rounded-lg outline-none focus:border-blue-500">
-                <button onclick="mulaiSesi()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg mt-4 hover:bg-blue-700">BUKA TOKO</button>
+    <div id="modal-login" class="modal flex items-center justify-center p-4" style="display: flex;">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl border border-slate-200 text-center">
+            <div class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg rotate-3">
+                <i class="fas fa-university text-4xl text-white -rotate-3"></i>
+            </div>
+            <h2 class="text-2xl font-black text-slate-800 mb-1">BRILink Pro</h2>
+            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-8">Sistem Manajemen Transaksi</p>
+            <div class="space-y-4">
+                <div class="relative">
+                    <i class="fas fa-envelope absolute left-4 top-4 text-slate-400"></i>
+                    <input type="email" id="login-email" placeholder="Email Akun" class="w-full pl-12 pr-4 py-3 bg-slate-100 border-none rounded-2xl outline-none focus:ring-2 ring-blue-500 transition-all">
+                </div>
+                <div class="relative">
+                    <i class="fas fa-lock absolute left-4 top-4 text-slate-400"></i>
+                    <input type="password" id="login-pass" placeholder="Password" class="w-full pl-12 pr-4 py-3 bg-slate-100 border-none rounded-2xl outline-none focus:ring-2 ring-blue-500 transition-all">
+                </div>
+                <button onclick="handleLogin()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all">
+                    MASUK SEKARANG
+                </button>
             </div>
         </div>
     </div>
 
-    <header class="bg-blue-700 text-white sticky top-0 z-50 shadow-md">
-        <div class="p-4 flex justify-between items-center">
-            <h1 id="display-nama-toko" class="font-bold text-lg">Loading...</h1>
+    <header class="bg-blue-700 text-white sticky top-0 z-50 shadow-xl">
+        <div class="max-w-7xl mx-auto p-4 flex justify-between items-center">
+            <div>
+                <h1 class="font-black text-lg flex items-center gap-2">
+                    <i class="fas fa-store-alt"></i> <span id="display-nama-toko text-white">PRO DASHBOARD</span>
+                </h1>
+                <p id="display-user" class="text-[9px] font-bold text-blue-200 uppercase tracking-tighter"></p>
+            </div>
             <div class="flex items-center gap-3">
-                <span id="sync-status" class="text-[10px] bg-yellow-500 px-2 py-1 rounded text-blue-900 font-bold">
-                    OFFLINE
-                </span>
-                <button onclick="resetData()" class="text-xs bg-red-500 px-2 py-1 rounded">Reset</button>
+                <span id="sync-status" class="text-[9px] px-3 py-1 rounded-full font-black"></span>
+                <button onclick="handleLogout()" class="w-8 h-8 flex items-center justify-center bg-red-500/20 hover:bg-red-500 rounded-xl transition-all">
+                    <i class="fas fa-sign-out-alt text-xs"></i>
+                </button>
             </div>
         </div>
         
-        <div class="flex overflow-x-auto p-4 gap-4 hide-scrollbar bg-blue-800 border-t border-blue-600">
-            <div class="min-w-[120px] md:flex-1 bg-white/10 p-2 rounded-lg border border-white/20">
-                <p class="text-[10px] uppercase opacity-70">Laci (Fisik)</p>
-                <p id="val-laci" class="font-bold text-sm">Rp 0</p>
+        <div class="flex overflow-x-auto p-4 gap-3 hide-scrollbar bg-blue-800/50 backdrop-blur-sm border-t border-blue-600/50">
+            <div class="min-w-[130px] bg-white/10 p-3 rounded-2xl border border-white/10 shadow-inner">
+                <p class="text-[8px] font-black uppercase text-blue-300 mb-1">Laci Fisik</p>
+                <p id="val-laci" class="font-bold text-sm money-font">Rp 0</p>
             </div>
-            <div class="min-w-[120px] md:flex-1 bg-white/10 p-2 rounded-lg border border-white/20">
-                <p class="text-[10px] uppercase opacity-70">Saldo BRI</p>
-                <p id="val-bri" class="font-bold text-sm">Rp 0</p>
+            <div class="min-w-[130px] bg-white/10 p-3 rounded-2xl border border-white/10 shadow-inner">
+                <p class="text-[8px] font-black uppercase text-blue-300 mb-1">Saldo BRI</p>
+                <p id="val-bri" class="font-bold text-sm money-font">Rp 0</p>
             </div>
-            <div class="min-w-[120px] md:flex-1 bg-white/10 p-2 rounded-lg border border-white/20 text-red-300">
-                <p class="text-[10px] uppercase opacity-70">Hutang</p>
-                <p id="val-hutang" class="font-bold text-sm">Rp 0</p>
+            <div class="min-w-[130px] bg-white/10 p-3 rounded-2xl border border-white/10 shadow-inner">
+                <p class="text-[8px] font-black uppercase text-blue-300 mb-1">Saldo Dana</p>
+                <p id="val-dana" class="font-bold text-sm money-font">Rp 0</p>
             </div>
-            <div class="min-w-[120px] md:flex-1 bg-white/10 p-2 rounded-lg border border-white/20 text-green-300">
-                <p class="text-[10px] uppercase opacity-70">Laba Sesi</p>
-                <p id="val-laba" class="font-bold text-sm">Rp 0</p>
+            <div class="min-w-[130px] bg-white/10 p-3 rounded-2xl border border-white/10 shadow-inner">
+                <p class="text-[8px] font-black uppercase text-blue-300 mb-1">Saldo Pulsa</p>
+                <p id="val-pulsa" class="font-bold text-sm money-font">Rp 0</p>
+            </div>
+            <div class="min-w-[130px] bg-red-500/20 p-3 rounded-2xl border border-red-500/20">
+                <p class="text-[8px] font-black uppercase text-red-300 mb-1">Total Piutang</p>
+                <p id="val-hutang" class="font-bold text-sm money-font text-red-200">Rp 0</p>
             </div>
         </div>
     </header>
 
-    <main class="p-4 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-        <section class="md:col-span-1">
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <h2 class="font-bold mb-4 flex items-center gap-2 text-gray-700">
-                    <i class="fas fa-plus-circle text-blue-600"></i> Transaksi Baru
+    <main class="p-4 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+        <section class="md:col-span-1 space-y-6">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                <h2 class="font-black mb-6 flex items-center gap-2 text-slate-700 uppercase text-xs tracking-widest">
+                    <span class="w-6 h-6 bg-blue-600 text-white rounded-lg flex items-center justify-center italic">i</span> 
+                    Transaksi Baru
                 </h2>
-                <div class="space-y-4">
-                    <select id="trx-jenis" class="w-full border-b p-2 outline-none font-bold text-blue-600">
-                        <option value="TRANSFER">TRANSFER BANK</option>
-                        <option value="TARIK">TARIK TUNAI</option>
-                        <option value="PULSA">PULSA / KUOTA</option>
-                    </select>
-                    <div>
-                        <label class="text-[10px] font-bold text-gray-400 uppercase">Nominal</label>
-                        <input type="number" id="trx-nominal" class="w-full border-b-2 border-gray-200 focus:border-blue-500 outline-none p-2 text-lg font-bold" placeholder="0">
+                <div class="space-y-5">
+                    <div class="bg-slate-50 p-1 rounded-2xl flex">
+                        <select id="trx-jenis" onchange="toggleForm()" class="w-full bg-transparent p-3 outline-none font-black text-blue-600 uppercase text-xs">
+                            <option value="TRANSFER">Transfer Bank</option>
+                            <option value="TARIK">Tarik Tunai</option>
+                            <option value="PULSA">Pulsa & Kuota</option>
+                        </select>
                     </div>
-                    <div class="flex gap-4">
-                        <div class="flex-1">
-                            <label class="text-[10px] font-bold text-gray-400 uppercase">Admin Pelanggan</label>
-                            <input type="number" id="trx-admin" class="w-full border-b border-gray-200 outline-none p-2" value="5000">
+                    <div class="relative">
+                        <label class="text-[9px] font-black text-slate-400 uppercase ml-2">Nominal Utama</label>
+                        <input type="number" id="trx-nominal" class="w-full bg-slate-50 rounded-2xl p-4 outline-none font-black text-2xl text-slate-800 ring-offset-2 focus:ring-2 ring-blue-500" placeholder="0">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[9px] font-black text-slate-400 uppercase ml-2">Admin Cust</label>
+                            <input type="number" id="trx-admin" class="w-full bg-slate-50 rounded-xl p-3 outline-none font-bold" value="5000">
                         </div>
-                        <div class="flex-1">
-                            <label class="text-[10px] font-bold text-gray-400 uppercase">Admin Bank</label>
-                            <input type="number" id="trx-potongan" class="w-full border-b border-gray-200 outline-none p-2" value="0">
+                        <div id="field-potongan">
+                            <label class="text-[9px] font-black text-red-400 uppercase ml-2">Potong Bank</label>
+                            <input type="number" id="trx-potongan" class="w-full bg-slate-50 rounded-xl p-3 outline-none font-bold" value="0">
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 text-sm py-2">
-                        <input type="checkbox" id="trx-is-hutang"> 
-                        <label for="trx-is-hutang" class="text-red-600 font-bold uppercase text-xs">Jadikan Hutang</label>
-                    </div>
-                    <button onclick="simpanTransaksi()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all">
-                        Simpan Transaksi
+                    <label class="flex items-center gap-3 p-4 bg-red-50 rounded-2xl border border-red-100 cursor-pointer">
+                        <input type="checkbox" id="trx-is-hutang" class="w-5 h-5 rounded-lg text-red-600">
+                        <span class="text-xs font-black text-red-700 uppercase tracking-tighter">Bawa Dulu (Hutang)</span>
+                    </label>
+                    <button onclick="simpanTransaksi()" class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl shadow-xl hover:bg-blue-600 transition-all uppercase text-xs tracking-widest">
+                        Simpan & Update Saldo
                     </button>
                 </div>
             </div>
         </section>
 
-        <section class="md:col-span-2">
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="p-4 border-b flex justify-between items-center bg-gray-50">
-                    <h2 class="font-bold text-gray-700">Riwayat Sesi Ini</h2>
-                    <button id="btn-upload" onclick="uploadKeFirebase()" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold hover:bg-blue-200">
-                        <i class="fas fa-cloud-upload-alt"></i> UPLOAD KE CLOUD
+        <section class="md:col-span-2 space-y-6">
+            <div id="laporan-kasir" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest italic">Performance Sesi</h2>
+                    <button onclick="exportLaporan()" class="bg-green-100 text-green-700 px-4 py-2 rounded-xl text-[10px] font-black flex items-center gap-2 hover:bg-green-600 hover:text-white transition-all">
+                        <i class="fas fa-file-excel"></i> EXCEL REPORT
                     </button>
                 </div>
-                <div id="list-riwayat" class="divide-y divide-gray-100 min-h-[200px]">
+                <div id="rekap-laba-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     </div>
             </div>
-            <button onclick="tutupSesi()" class="w-full mt-4 border-2 border-blue-600 text-blue-600 font-bold py-2 rounded-lg hover:bg-blue-50">AKHIRI SESI</button>
+
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white/50">
+                    <h2 class="font-black text-slate-800 text-xs uppercase tracking-widest">Log Transaksi</h2>
+                    <button id="btn-upload" onclick="uploadKeFirebase()" class="bg-blue-600 text-white px-5 py-2 rounded-xl text-[10px] font-black shadow-lg shadow-blue-200 active:scale-90 transition-all flex items-center gap-2">
+                        <i class="fas fa-sync-alt"></i> SYNC KE CLOUD
+                    </button>
+                </div>
+                <div id="list-riwayat" class="divide-y divide-slate-100 max-h-[500px] overflow-y-auto">
+                    </div>
+            </div>
         </section>
     </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDFUlHciJ3ms6bViuLbog2J66-k-oF4DLM",
@@ -125,23 +159,40 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
 
         let state = JSON.parse(localStorage.getItem('brilink_v1')) || {
-            namaToko: "Nama Toko Kamu",
-            isSesiAktif: false,
-            saldo: { laci: 0, bri: 0, dana: 0, pulsa: 0, hutang: 0, labaSesi: 0 },
-            antrean: []
+            saldo: { laci: 0, bri: 0, dana: 0, pulsa: 0, hutang: 0 },
+            antrean: [],
+            labaPerKasir: {}
         };
 
-        window.mulaiSesi = () => {
-            state.saldo.laci = parseFloat(document.getElementById('init-laci').value) || 0;
-            state.saldo.bri = parseFloat(document.getElementById('init-bri').value) || 0;
-            state.saldo.dana = parseFloat(document.getElementById('init-dana').value) || 0;
-            state.saldo.pulsa = parseFloat(document.getElementById('init-pulsa').value) || 0;
-            state.isSesiAktif = true;
-            saveAndRender();
-            document.getElementById('modal-sesi').style.display = 'none';
+        let activeUser = null;
+
+        // AUTH HANDLER
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                activeUser = { email: user.email, role: userDoc.exists() ? userDoc.data().role : 'kasir' };
+                document.getElementById('modal-login').style.display = 'none';
+                document.getElementById('display-user').innerText = `${activeUser.role} : ${activeUser.email}`;
+                if(activeUser.role === 'admin') document.getElementById('laporan-kasir').classList.remove('hidden');
+                renderUI();
+            } else {
+                document.getElementById('modal-login').style.display = 'flex';
+            }
+        });
+
+        window.handleLogin = async () => {
+            const e = document.getElementById('login-email').value;
+            const p = document.getElementById('login-pass').value;
+            try { await signInWithEmailAndPassword(auth, e, p); } catch (err) { alert("Akses Ditolak! Cek Email/Pass."); }
+        };
+
+        window.handleLogout = () => {
+            if(state.antrean.length > 0) return alert("Upload data dulu sebelum keluar!");
+            signOut(auth);
         };
 
         window.simpanTransaksi = () => {
@@ -151,111 +202,114 @@
             const potongan = parseFloat(document.getElementById('trx-potongan').value) || 0;
             const isHutang = document.getElementById('trx-is-hutang').checked;
 
-            if(nominal <= 0) return alert("Nominal harus diisi!");
+            if(nominal <= 0) return alert("Nominal tidak boleh kosong!");
 
             let laba = 0;
             if (jenis === 'TRANSFER') {
                 laba = admin - potongan;
                 state.saldo.bri -= (nominal + potongan);
-                if (!isHutang) state.saldo.laci += (nominal + admin);
+                if(!isHutang) state.saldo.laci += (nominal + admin);
             } else if (jenis === 'TARIK') {
                 laba = admin;
                 state.saldo.bri += nominal;
                 state.saldo.laci -= (nominal - admin);
+            } else { // Pulsa/Dana
+                laba = admin;
+                if(jenis === 'PULSA') state.saldo.pulsa -= nominal;
+                if(!isHutang) state.saldo.laci += (nominal + admin);
             }
 
-            if (isHutang) state.saldo.hutang += (nominal + (jenis === 'TRANSFER' ? admin : 0));
-            state.saldo.labaSesi += laba;
+            if(isHutang) state.saldo.hutang += (nominal + (jenis === 'TRANSFER' ? admin : 0));
+            
+            state.labaPerKasir[activeUser.email] = (state.labaPerKasir[activeUser.email] || 0) + laba;
 
             state.antrean.push({
                 id: Date.now(),
-                waktu: new Date().toLocaleTimeString(),
-                jenis, nominal, admin, potongan, isHutang, laba,
-                uploaded: false
+                waktu: new Date().toLocaleTimeString('id-ID'),
+                petugas: activeUser.email,
+                jenis, nominal, admin, potongan, isHutang, laba
             });
 
-            saveAndRender();
-            alert("Berhasil disimpan secara lokal!");
+            localStorage.setItem('brilink_v1', JSON.stringify(state));
+            renderUI();
+            document.getElementById('trx-nominal').value = '';
         };
 
         window.uploadKeFirebase = async () => {
+            if (state.antrean.length === 0) return alert("Data sudah sinkron.");
             const btn = document.getElementById('btn-upload');
-            if (state.antrean.length === 0) return alert("Semua data sudah sinkron.");
-            
-            btn.innerText = "SINKRONISASI...";
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> SYNCING...';
             btn.disabled = true;
 
             try {
-                await setDoc(doc(db, "laporan", "realtime_saldo"), state.saldo);
-                for (let trx of state.antrean) {
-                    if (!trx.uploaded) {
-                        await addDoc(collection(db, "transaksi_harian"), {...trx, uploaded: true});
-                        trx.uploaded = true;
-                    }
+                await setDoc(doc(db, "laporan", "realtime_status"), {
+                    ...state.saldo,
+                    laba_detail: state.labaPerKasir,
+                    last_update: new Date()
+                });
+                for (let t of state.antrean) {
+                    await addDoc(collection(db, "logs"), {...t, server_time: new Date()});
                 }
-                state.antrean = state.antrean.filter(t => !t.uploaded);
-                saveAndRender();
-                alert("Berhasil upload ke Firebase!");
-            } catch (e) {
-                alert("Gagal! Cek internet.");
-            } finally {
-                btn.innerText = "UPLOAD KE CLOUD";
-                btn.disabled = false;
-            }
+                state.antrean = []; // Bersihkan antrean lokal setelah sukses
+                localStorage.setItem('brilink_v1', JSON.stringify(state));
+                renderUI();
+                alert("Cloud Sync Berhasil!");
+            } catch (e) { alert("Sync Gagal! Cek Koneksi."); }
+            finally { btn.innerHTML = '<i class="fas fa-sync-alt"></i> SYNC KE CLOUD'; btn.disabled = false; }
         };
 
-        window.tutupSesi = () => {
-            if (state.antrean.length > 0) return alert("Upload dulu semua data!");
-            if (confirm("Akhiri sesi? Saldo akan disimpan sebagai saldo awal berikutnya.")) {
-                state.isSesiAktif = false;
-                state.saldo.labaSesi = 0;
-                saveAndRender();
-                location.reload();
-            }
+        window.exportLaporan = () => {
+            if(state.antrean.length === 0) return alert("Belum ada data di sesi ini.");
+            const dataMap = state.antrean.map(t => ({
+                "Jam": t.waktu, "User": t.petugas, "Aksi": t.jenis, 
+                "Nominal": t.nominal, "Admin": t.admin, "Profit": t.laba, "Ket": t.isHutang ? "Hutang" : "Lunas"
+            }));
+            const ws = XLSX.utils.json_to_sheet(dataMap);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Sesi_BRILink");
+            XLSX.writeFile(wb, `Report_${activeUser.email.split('@')[0]}.xlsx`);
         };
-
-        window.resetData = () => {
-            if(confirm("Hapus semua data?")) {
-                localStorage.removeItem('brilink_v1');
-                location.reload();
-            }
-        };
-
-        function saveAndRender() {
-            localStorage.setItem('brilink_v1', JSON.stringify(state));
-            renderUI();
-        }
 
         function renderUI() {
-            if (state.isSesiAktif) document.getElementById('modal-sesi').style.display = 'none';
-            document.getElementById('display-nama-toko').innerText = state.namaToko;
             document.getElementById('val-laci').innerText = formatRupiah(state.saldo.laci);
             document.getElementById('val-bri').innerText = formatRupiah(state.saldo.bri);
+            document.getElementById('val-dana').innerText = formatRupiah(state.saldo.dana);
+            document.getElementById('val-pulsa').innerText = formatRupiah(state.saldo.pulsa);
             document.getElementById('val-hutang').innerText = formatRupiah(state.saldo.hutang);
-            document.getElementById('val-laba').innerText = formatRupiah(state.saldo.labaSesi);
 
-            const list = document.getElementById('list-riwayat');
-            list.innerHTML = state.antrean.map(t => `
-                <div class="p-3 flex justify-between items-center bg-white">
+            const labaDiv = document.getElementById('rekap-laba-list');
+            labaDiv.innerHTML = Object.entries(state.labaPerKasir).map(([email, val]) => `
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-sm">
+                    <p class="text-[8px] font-black text-slate-400 uppercase truncate">${email}</p>
+                    <p class="text-lg font-black text-blue-600 money-font">${formatRupiah(val)}</p>
+                </div>
+            `).join('');
+
+            const riwayatDiv = document.getElementById('list-riwayat');
+            riwayatDiv.innerHTML = state.antrean.slice().reverse().map(t => `
+                <div class="p-4 flex justify-between items-center hover:bg-slate-50 transition-all">
                     <div>
-                        <p class="font-bold text-xs">${t.jenis} - ${formatRupiah(t.nominal)}</p>
-                        <p class="text-[9px] text-gray-400 uppercase">${t.waktu} • ${t.isHutang ? '<span class="text-red-500 font-bold">HUTANG</span>' : '<span class="text-green-500">LUNAS</span>'}</p>
+                        <p class="font-black text-xs text-slate-700">${t.jenis} • ${formatRupiah(t.nominal)}</p>
+                        <p class="text-[9px] text-slate-400 font-bold">${t.waktu} | ${t.petugas.split('@')[0].toUpperCase()}</p>
                     </div>
                     <div class="text-right">
-                        <p class="text-[10px] font-bold text-green-600">+${formatRupiah(t.laba)}</p>
+                        <p class="text-[10px] font-black ${t.isHutang ? 'text-red-500 bg-red-50' : 'text-green-600 bg-green-50'} px-3 py-1 rounded-lg">
+                            ${t.isHutang ? 'HUTANG' : '+ '+formatRupiah(t.laba)}
+                        </p>
                     </div>
                 </div>
             `).join('');
 
-            const sync = document.getElementById('sync-status');
-            sync.innerText = state.antrean.length > 0 ? `${state.antrean.length} PENDING` : "TERUNGGAH";
-            sync.className = state.antrean.length > 0 ? "text-[10px] bg-yellow-500 px-2 py-1 rounded text-blue-900 font-bold" : "text-[10px] bg-green-500 px-2 py-1 rounded text-white font-bold";
+            const s = document.getElementById('sync-status');
+            s.innerText = state.antrean.length > 0 ? `${state.antrean.length} PENDING` : "CLOUDSYNCED";
+            s.className = `text-[9px] px-3 py-1 rounded-full font-black ${state.antrean.length > 0 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`;
         }
 
-        function formatRupiah(n) {
-            return "Rp " + n.toLocaleString('id-ID');
-        }
-
+        function formatRupiah(n) { return "Rp " + n.toLocaleString('id-ID'); }
+        window.toggleForm = () => {
+            const j = document.getElementById('trx-jenis').value;
+            document.getElementById('field-potongan').style.opacity = (j === 'TRANSFER') ? '1' : '0';
+        };
         renderUI();
     </script>
 </body>
