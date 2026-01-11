@@ -172,23 +172,25 @@
 
         // AUTH HANDLER
        // AUTH LISTENER - VERSI PERBAIKAN TOTAL
-onAuthStateChanged(auth, (user) => {
-    const modalLogin = document.getElementById('modal-login');
-    const appContent = document.getElementById('app-content');
-
+onAuthStateChanged(auth, async (user) => {
     if (user) {
-        console.log("User terdeteksi:", user.email);
+        // AMBIL DATA ROLE DARI FIRESTORE
+        const userDoc = await getDoc(doc(db, "users", user.uid));
         
-        // PAKSA TAMPILAN BERUBAH
-        modalLogin.setAttribute("style", "display: none !important");
-        appContent.setAttribute("style", "display: block !important");
-        
-        document.getElementById('display-user').innerText = "KASIR: " + user.email;
-        renderUI();
+        if (userDoc.exists()) {
+            // JIKA DATA ADA, TAMPILKAN MENU
+            document.getElementById('modal-login').style.setProperty('display', 'none', 'important');
+            // Pastikan ID 'app-content' atau 'main-app' ada di HTML kamu
+            const app = document.getElementById('app-content') || document.querySelector('main');
+            if(app) app.style.setProperty('display', 'block', 'important');
+            
+            console.log("Akses diberikan sebagai:", userDoc.data().role);
+        } else {
+            alert("Login sukses, tapi UID kamu belum terdaftar di Firestore koleksi 'users'!");
+            // signOut(auth); // Opsional: paksa keluar jika tidak ada role
+        }
     } else {
-        console.log("Tidak ada user, tampilkan login.");
-        modalLogin.setAttribute("style", "display: flex !important");
-        appContent.setAttribute("style", "display: none !important");
+        document.getElementById('modal-login').style.display = 'flex';
     }
 });
 
