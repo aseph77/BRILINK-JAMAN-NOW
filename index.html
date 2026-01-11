@@ -171,18 +171,26 @@
         let activeUser = null;
 
         // AUTH HANDLER
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                activeUser = { email: user.email, role: userDoc.exists() ? userDoc.data().role : 'kasir' };
-                document.getElementById('modal-login').style.display = 'none';
-                document.getElementById('display-user').innerText = `${activeUser.role} : ${activeUser.email}`;
-                if(activeUser.role === 'admin') document.getElementById('laporan-kasir').classList.remove('hidden');
-                renderUI();
-            } else {
-                document.getElementById('modal-login').style.display = 'flex';
-            }
-        });
+       // AUTH LISTENER - VERSI PERBAIKAN TOTAL
+onAuthStateChanged(auth, (user) => {
+    const modalLogin = document.getElementById('modal-login');
+    const appContent = document.getElementById('app-content');
+
+    if (user) {
+        console.log("User terdeteksi:", user.email);
+        
+        // PAKSA TAMPILAN BERUBAH
+        modalLogin.setAttribute("style", "display: none !important");
+        appContent.setAttribute("style", "display: block !important");
+        
+        document.getElementById('display-user').innerText = "KASIR: " + user.email;
+        renderUI();
+    } else {
+        console.log("Tidak ada user, tampilkan login.");
+        modalLogin.setAttribute("style", "display: flex !important");
+        appContent.setAttribute("style", "display: none !important");
+    }
+});
 
         window.handleLogin = async () => {
     const emailField = document.getElementById('login-email');
