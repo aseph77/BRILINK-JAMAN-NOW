@@ -185,10 +185,49 @@
         });
 
         window.handleLogin = async () => {
-            const e = document.getElementById('login-email').value;
-            const p = document.getElementById('login-pass').value;
-            try { await signInWithEmailAndPassword(auth, e, p); } catch (err) { alert("Akses Ditolak! Cek Email/Pass."); }
-        };
+    const emailField = document.getElementById('login-email');
+    const passField = document.getElementById('login-pass');
+    const loginBtn = document.querySelector('#modal-login button');
+
+    const email = emailField.value.trim(); // Hapus spasi tak sengaja
+    const pass = passField.value;
+
+    if (!email || !pass) return alert("Isi email dan password!");
+
+    loginBtn.innerText = "PROSES VERIFIKASI...";
+    loginBtn.disabled = true;
+
+    try {
+        console.log("Mencoba login untuk:", email);
+        const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+        console.log("Login sukses!", userCredential.user.uid);
+    } catch (error) {
+        console.error("Kode Error Firebase:", error.code);
+        
+        // Pesan error spesifik agar kita tahu masalahnya
+        let pesan = "";
+        switch (error.code) {
+            case 'auth/user-not-found':
+                pesan = "Email ini tidak terdaftar di Firebase Authentication!";
+                break;
+            case 'auth/wrong-password':
+                pesan = "Password salah! Pastikan Caps Lock mati.";
+                break;
+            case 'auth/invalid-email':
+                pesan = "Format email salah (contoh: user@gmail.com).";
+                break;
+            case 'auth/network-request-failed':
+                pesan = "Koneksi internet gagal atau Firebase diblokir.";
+                break;
+            default:
+                pesan = "Error: " + error.message;
+        }
+        alert(pesan);
+    } finally {
+        loginBtn.innerText = "MASUK SEKARANG";
+        loginBtn.disabled = false;
+    }
+};
 
         window.handleLogout = () => {
             if(state.antrean.length > 0) return alert("Upload data dulu sebelum keluar!");
