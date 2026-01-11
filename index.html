@@ -3,222 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BRILink Manager - [Nama Toko]</title>
+    <title>BRILink Manager Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Custom scrollbar untuk widget saldo di mobile */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen pb-20 md:pb-0">
 
+    <div id="modal-sesi" class="modal flex items-center justify-center p-4" style="display: flex;">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <h2 class="text-xl font-bold mb-4 text-blue-700">Mulai Sesi Hari Ini</h2>
+            <p class="text-xs text-gray-500 mb-4">Sesuaikan saldo laci dan digital saat ini.</p>
+            <div class="space-y-3">
+                <input type="number" id="init-laci" placeholder="Saldo Laci Fisik" class="w-full p-3 border rounded-lg outline-none focus:border-blue-500">
+                <input type="number" id="init-bri" placeholder="Saldo Rekening BRI" class="w-full p-3 border rounded-lg outline-none focus:border-blue-500">
+                <input type="number" id="init-dana" placeholder="Saldo DANA" class="w-full p-3 border rounded-lg outline-none focus:border-blue-500">
+                <input type="number" id="init-pulsa" placeholder="Saldo Aplikasi Pulsa" class="w-full p-3 border rounded-lg outline-none focus:border-blue-500">
+                <button onclick="mulaiSesi()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg mt-4 hover:bg-blue-700">BUKA TOKO</button>
+            </div>
+        </div>
+    </div>
+
     <header class="bg-blue-700 text-white sticky top-0 z-50 shadow-md">
         <div class="p-4 flex justify-between items-center">
-            <h1 class="font-bold text-lg">Toko BRILink Kita</h1>
+            <h1 id="display-nama-toko" class="font-bold text-lg">Loading...</h1>
             <div class="flex items-center gap-3">
-                <span id="sync-status" class="text-xs bg-yellow-500 px-2 py-1 rounded text-blue-900 font-bold">
-                    <i class="fas fa-cloud-upload-alt"></i> 3 Data Pending
+                <span id="sync-status" class="text-[10px] bg-yellow-500 px-2 py-1 rounded text-blue-900 font-bold">
+                    OFFLINE
                 </span>
-                <i class="fas fa-eye-slash cursor-pointer" id="toggle-privacy"></i>
+                <button onclick="resetData()" class="text-xs bg-red-500 px-2 py-1 rounded">Reset</button>
             </div>
         </div>
         
         <div class="flex overflow-x-auto p-4 gap-4 hide-scrollbar bg-blue-800 border-t border-blue-600">
             <div class="min-w-[120px] md:flex-1 bg-white/10 p-2 rounded-lg border border-white/20">
-                <p class="text-[10px] uppercase opacity-70">Saldo Laci</p>
-                <p class="font-bold text-sm money">Rp 2.500.000</p>
+                <p class="text-[10px] uppercase opacity-70">Laci (Fisik)</p>
+                <p id="val-laci" class="font-bold text-sm">Rp 0</p>
             </div>
             <div class="min-w-[120px] md:flex-1 bg-white/10 p-2 rounded-lg border border-white/20">
                 <p class="text-[10px] uppercase opacity-70">Saldo BRI</p>
-                <p class="font-bold text-sm money">Rp 15.750.000</p>
+                <p id="val-bri" class="font-bold text-sm">Rp 0</p>
             </div>
             <div class="min-w-[120px] md:flex-1 bg-white/10 p-2 rounded-lg border border-white/20 text-red-300">
-                <p class="text-[10px] uppercase opacity-70">Total Hutang</p>
-                <p class="font-bold text-sm money">Rp 450.000</p>
+                <p class="text-[10px] uppercase opacity-70">Hutang</p>
+                <p id="val-hutang" class="font-bold text-sm">Rp 0</p>
             </div>
             <div class="min-w-[120px] md:flex-1 bg-white/10 p-2 rounded-lg border border-white/20 text-green-300">
                 <p class="text-[10px] uppercase opacity-70">Laba Sesi</p>
-                <p class="font-bold text-sm money">Rp 75.000</p>
+                <p id="val-laba" class="font-bold text-sm">Rp 0</p>
             </div>
         </div>
     </header>
 
     <main class="p-4 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        <section class="md:col-span-1 order-1 md:order-2">
+        <section class="md:col-span-1">
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <h2 class="font-bold mb-4 flex items-center gap-2">
+                <h2 class="font-bold mb-4 flex items-center gap-2 text-gray-700">
                     <i class="fas fa-plus-circle text-blue-600"></i> Transaksi Baru
                 </h2>
-                
-                <div class="flex gap-2 mb-4">
-                    <button class="flex-1 py-2 bg-blue-100 text-blue-700 rounded-lg text-xs font-bold border border-blue-200">TRANSFER</button>
-                    <button class="flex-1 py-2 bg-gray-100 text-gray-600 rounded-lg text-xs font-bold">PULSA</button>
-                    <button class="flex-1 py-2 bg-gray-100 text-gray-600 rounded-lg text-xs font-bold">TARIK</button>
-                </div>
-
                 <div class="space-y-4">
+                    <select id="trx-jenis" class="w-full border-b p-2 outline-none font-bold text-blue-600">
+                        <option value="TRANSFER">TRANSFER BANK</option>
+                        <option value="TARIK">TARIK TUNAI</option>
+                        <option value="PULSA">PULSA / KUOTA</option>
+                    </select>
                     <div>
-                        <label class="text-xs font-semibold text-gray-500 uppercase">Nominal</label>
-                        <input type="number" class="w-full border-b-2 border-gray-200 focus:border-blue-500 outline-none p-2 text-lg font-bold" placeholder="0">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Nominal</label>
+                        <input type="number" id="trx-nominal" class="w-full border-b-2 border-gray-200 focus:border-blue-500 outline-none p-2 text-lg font-bold" placeholder="0">
                     </div>
                     <div class="flex gap-4">
                         <div class="flex-1">
-                            <label class="text-xs font-semibold text-gray-500 uppercase">Admin Pelanggan</label>
-                            <input type="number" class="w-full border-b border-gray-200 focus:border-blue-500 outline-none p-2" value="5000">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase">Admin Pelanggan</label>
+                            <input type="number" id="trx-admin" class="w-full border-b border-gray-200 outline-none p-2" value="5000">
                         </div>
                         <div class="flex-1">
-                            <label class="text-xs font-semibold text-gray-500 uppercase">Metode Admin</label>
-                            <select class="w-full border-b border-gray-200 outline-none p-2 text-sm bg-transparent">
-                                <option>TUNAI</option>
-                                <option>POTONG SALDO</option>
-                            </select>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase">Admin Bank</label>
+                            <input type="number" id="trx-potongan" class="w-full border-b border-gray-200 outline-none p-2" value="0">
                         </div>
                     </div>
-                    <button class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-200 active:scale-95 transition-all">
-                        Simpan Transaksi (Offline)
+                    <div class="flex items-center gap-2 text-sm py-2">
+                        <input type="checkbox" id="trx-is-hutang"> 
+                        <label for="trx-is-hutang" class="text-red-600 font-bold uppercase text-xs">Jadikan Hutang</label>
+                    </div>
+                    <button onclick="simpanTransaksi()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all">
+                        Simpan Transaksi
                     </button>
                 </div>
             </div>
         </section>
 
-        <section class="md:col-span-2 order-2 md:order-1">
+        <section class="md:col-span-2">
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="p-4 border-b border-gray-100 flex justify-between items-center">
-                    <h2 class="font-bold">Riwayat Transaksi</h2>
-                    <button class="text-blue-600 text-sm font-bold"><i class="fas fa-sync"></i> Upload Semua</button>
+                <div class="p-4 border-b flex justify-between items-center bg-gray-50">
+                    <h2 class="font-bold text-gray-700">Riwayat Sesi Ini</h2>
+                    <button id="btn-upload" onclick="uploadKeFirebase()" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold hover:bg-blue-200">
+                        <i class="fas fa-cloud-upload-alt"></i> UPLOAD KE CLOUD
+                    </button>
                 </div>
-                <div class="divide-y divide-gray-100">
-                    <div class="p-4 flex justify-between items-center hover:bg-gray-50">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
-                                <i class="fas fa-paper-plane text-sm"></i>
-                            </div>
-                            <div>
-                                <p class="font-bold text-sm">Transfer BRI</p>
-                                <p class="text-[10px] text-gray-400">12:30 • <span class="text-yellow-600 uppercase font-bold text-[9px]"><i class="fas fa-clock"></i> Belum Sinkron</span></p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-bold text-sm">Rp 1.000.000</p>
-                            <p class="text-[10px] text-green-600 font-bold">+ Laba Rp 2.500</p>
-                        </div>
+                <div id="list-riwayat" class="divide-y divide-gray-100 min-h-[200px]">
                     </div>
-                </div>
             </div>
+            <button onclick="tutupSesi()" class="w-full mt-4 border-2 border-blue-600 text-blue-600 font-bold py-2 rounded-lg hover:bg-blue-50">AKHIRI SESI</button>
         </section>
-
     </main>
 
-    <nav class="md:hidden fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around p-3 z-50">
-        <button class="text-blue-600 flex flex-col items-center"><i class="fas fa-home"></i><span class="text-[10px]">Home</span></button>
-        <button class="text-gray-400 flex flex-col items-center"><i class="fas fa-book"></i><span class="text-[10px]">Hutang</span></button>
-        <button class="text-gray-400 flex flex-col items-center"><i class="fas fa-database"></i><span class="text-[10px]">Master</span></button>
-        <button class="text-gray-400 flex flex-col items-center"><i class="fas fa-cog"></i><span class="text-[10px]">Setelan</span></button>
-    </nav>
-<script>
-    // --- STATE APLIKASI ---
-    // Data ini sementara disimpan di memori dan LocalStorage
-    let state = {
-        config: { namaToko: "Toko BRILink Kita" },
-        saldo: { laci: 0, bri: 0, dana: 0, pulsa: 0, hutang: 0, labaSesi: 0 },
-        antrean: [] // Transaksi yang belum di-upload
-    };
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // --- INISIALISASI ---
-    window.onload = () => {
-        loadDataLocal();
-        updateUI();
-    };
-
-    // --- FUNGSI LOGIKA SALDO ---
-    function tambahTransaksi(jenis, nominal, admin, potongan, metodeAdmin, isHutang) {
-        nominal = parseFloat(nominal) || 0;
-        admin = parseFloat(admin) || 0;
-        potongan = parseFloat(potongan) || 0;
-
-        let transaksiBaru = {
-            id: Date.now(),
-            waktu: new Date().toLocaleTimeString(),
-            jenis, nominal, admin, potongan, metodeAdmin, isHutang,
-            uploaded: false
+        const firebaseConfig = {
+            apiKey: "AIzaSyDFUlHciJ3ms6bViuLbog2J66-k-oF4DLM",
+            authDomain: "brilink-jaman-now.firebaseapp.com",
+            projectId: "brilink-jaman-now",
+            storageBucket: "brilink-jaman-now.firebasestorage.app",
+            messagingSenderId: "856199740278",
+            appId: "1:856199740278:web:95066429f78e87d9d49857"
         };
 
-        // 1. Hitung Laba
-        let labaBersih = 0;
-        if (jenis === 'TRANSFER') {
-            labaBersih = admin - potongan;
-            // Dampak Saldo
-            state.saldo.bri -= (nominal + potongan);
-            if (metodeAdmin === 'TUNAI' && !isHutang) state.saldo.laci += (nominal + admin);
-            if (metodeAdmin === 'POTONG SALDO' && !isHutang) state.saldo.laci += nominal;
-        } 
-        
-        else if (jenis === 'TARIK') {
-            labaBersih = admin;
-            state.saldo.bri += nominal;
-            state.saldo.laci -= nominal; // Keluar uang fisik
-            if (!isHutang) state.saldo.laci += admin;
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let state = JSON.parse(localStorage.getItem('brilink_v1')) || {
+            namaToko: "Nama Toko Kamu",
+            isSesiAktif: false,
+            saldo: { laci: 0, bri: 0, dana: 0, pulsa: 0, hutang: 0, labaSesi: 0 },
+            antrean: []
+        };
+
+        window.mulaiSesi = () => {
+            state.saldo.laci = parseFloat(document.getElementById('init-laci').value) || 0;
+            state.saldo.bri = parseFloat(document.getElementById('init-bri').value) || 0;
+            state.saldo.dana = parseFloat(document.getElementById('init-dana').value) || 0;
+            state.saldo.pulsa = parseFloat(document.getElementById('init-pulsa').value) || 0;
+            state.isSesiAktif = true;
+            saveAndRender();
+            document.getElementById('modal-sesi').style.display = 'none';
+        };
+
+        window.simpanTransaksi = () => {
+            const jenis = document.getElementById('trx-jenis').value;
+            const nominal = parseFloat(document.getElementById('trx-nominal').value) || 0;
+            const admin = parseFloat(document.getElementById('trx-admin').value) || 0;
+            const potongan = parseFloat(document.getElementById('trx-potongan').value) || 0;
+            const isHutang = document.getElementById('trx-is-hutang').checked;
+
+            if(nominal <= 0) return alert("Nominal harus diisi!");
+
+            let laba = 0;
+            if (jenis === 'TRANSFER') {
+                laba = admin - potongan;
+                state.saldo.bri -= (nominal + potongan);
+                if (!isHutang) state.saldo.laci += (nominal + admin);
+            } else if (jenis === 'TARIK') {
+                laba = admin;
+                state.saldo.bri += nominal;
+                state.saldo.laci -= (nominal - admin);
+            }
+
+            if (isHutang) state.saldo.hutang += (nominal + (jenis === 'TRANSFER' ? admin : 0));
+            state.saldo.labaSesi += laba;
+
+            state.antrean.push({
+                id: Date.now(),
+                waktu: new Date().toLocaleTimeString(),
+                jenis, nominal, admin, potongan, isHutang, laba,
+                uploaded: false
+            });
+
+            saveAndRender();
+            alert("Berhasil disimpan secara lokal!");
+        };
+
+        window.uploadKeFirebase = async () => {
+            const btn = document.getElementById('btn-upload');
+            if (state.antrean.length === 0) return alert("Semua data sudah sinkron.");
+            
+            btn.innerText = "SINKRONISASI...";
+            btn.disabled = true;
+
+            try {
+                await setDoc(doc(db, "laporan", "realtime_saldo"), state.saldo);
+                for (let trx of state.antrean) {
+                    if (!trx.uploaded) {
+                        await addDoc(collection(db, "transaksi_harian"), {...trx, uploaded: true});
+                        trx.uploaded = true;
+                    }
+                }
+                state.antrean = state.antrean.filter(t => !t.uploaded);
+                saveAndRender();
+                alert("Berhasil upload ke Firebase!");
+            } catch (e) {
+                alert("Gagal! Cek internet.");
+            } finally {
+                btn.innerText = "UPLOAD KE CLOUD";
+                btn.disabled = false;
+            }
+        };
+
+        window.tutupSesi = () => {
+            if (state.antrean.length > 0) return alert("Upload dulu semua data!");
+            if (confirm("Akhiri sesi? Saldo akan disimpan sebagai saldo awal berikutnya.")) {
+                state.isSesiAktif = false;
+                state.saldo.labaSesi = 0;
+                saveAndRender();
+                location.reload();
+            }
+        };
+
+        window.resetData = () => {
+            if(confirm("Hapus semua data?")) {
+                localStorage.removeItem('brilink_v1');
+                location.reload();
+            }
+        };
+
+        function saveAndRender() {
+            localStorage.setItem('brilink_v1', JSON.stringify(state));
+            renderUI();
         }
 
-        // 2. Jika Hutang
-        if (isHutang) {
-            state.saldo.hutang += (jenis === 'TRANSFER' ? (nominal + admin) : nominal);
-            // Saldo laci tidak bertambah karena uang belum diterima
-            if (jenis === 'TRANSFER') state.saldo.laci -= (metodeAdmin === 'TUNAI' ? (nominal + admin) : nominal);
+        function renderUI() {
+            if (state.isSesiAktif) document.getElementById('modal-sesi').style.display = 'none';
+            document.getElementById('display-nama-toko').innerText = state.namaToko;
+            document.getElementById('val-laci').innerText = formatRupiah(state.saldo.laci);
+            document.getElementById('val-bri').innerText = formatRupiah(state.saldo.bri);
+            document.getElementById('val-hutang').innerText = formatRupiah(state.saldo.hutang);
+            document.getElementById('val-laba').innerText = formatRupiah(state.saldo.labaSesi);
+
+            const list = document.getElementById('list-riwayat');
+            list.innerHTML = state.antrean.map(t => `
+                <div class="p-3 flex justify-between items-center bg-white">
+                    <div>
+                        <p class="font-bold text-xs">${t.jenis} - ${formatRupiah(t.nominal)}</p>
+                        <p class="text-[9px] text-gray-400 uppercase">${t.waktu} • ${t.isHutang ? '<span class="text-red-500 font-bold">HUTANG</span>' : '<span class="text-green-500">LUNAS</span>'}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] font-bold text-green-600">+${formatRupiah(t.laba)}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const sync = document.getElementById('sync-status');
+            sync.innerText = state.antrean.length > 0 ? `${state.antrean.length} PENDING` : "TERUNGGAH";
+            sync.className = state.antrean.length > 0 ? "text-[10px] bg-yellow-500 px-2 py-1 rounded text-blue-900 font-bold" : "text-[10px] bg-green-500 px-2 py-1 rounded text-white font-bold";
         }
 
-        state.saldo.labaSesi += labaBersih;
-        state.antrean.push(transaksiBaru);
-        
-        saveDataLocal();
-        updateUI();
-        alert("Transaksi disimpan secara lokal!");
-    }
-
-    // --- FUNGSI UI & STORAGE ---
-    function updateUI() {
-        // Update Saldo di Top Bar
-        document.querySelectorAll('.money')[0].innerText = formatRupiah(state.saldo.laci);
-        document.querySelectorAll('.money')[1].innerText = formatRupiah(state.saldo.bri);
-        document.querySelectorAll('.money')[2].innerText = formatRupiah(state.saldo.hutang);
-        document.querySelectorAll('.money')[3].innerText = formatRupiah(state.saldo.labaSesi);
-
-        // Update Indikator Sinkronisasi
-        const syncLabel = document.getElementById('sync-status');
-        const pendingCount = state.antrean.filter(t => !t.uploaded).length;
-        
-        if (pendingCount > 0) {
-            syncLabel.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> ${pendingCount} Data Pending`;
-            syncLabel.className = "text-xs bg-yellow-500 px-2 py-1 rounded text-blue-900 font-bold cursor-pointer";
-        } else {
-            syncLabel.innerHTML = `<i class="fas fa-check-circle"></i> Terunggah`;
-            syncLabel.className = "text-xs bg-green-500 px-2 py-1 rounded text-white font-bold";
+        function formatRupiah(n) {
+            return "Rp " + n.toLocaleString('id-ID');
         }
-    }
 
-    function formatRupiah(angka) {
-        return "Rp " + angka.toLocaleString('id-ID');
-    }
-
-    function saveDataLocal() {
-        localStorage.setItem('brilink_data', JSON.stringify(state));
-    }
-
-    function loadDataLocal() {
-        const localData = localStorage.getItem('brilink_data');
-        if (localData) state = JSON.parse(localData);
-    }
-
-    // Fungsi Reset (Sesuai permintaanmu)
-    function resetData() {
-        if (confirm("Hapus semua data sesi ini?")) {
-            localStorage.clear();
-            location.reload();
-        }
-    }
-</script>
+        renderUI();
+    </script>
 </body>
 </html>
