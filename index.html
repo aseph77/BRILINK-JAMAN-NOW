@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BRILink Pro - Anti CSP</title>
+    <title>BRILink Realtime Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
@@ -14,39 +14,37 @@
 </head>
 <body class="bg-slate-50 min-h-screen">
 
-    <div id="modal-login" class="modal flex items-center justify-center p-4" style="display: flex;">
+    <div id="modal-login" class="modal flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl text-center border">
-            <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-tighter">Login BRILink</h2>
+            <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-tighter">Login Realtime</h2>
             <div class="space-y-4">
                 <input type="email" id="login-email" placeholder="Email Akun" class="w-full p-4 bg-slate-100 rounded-2xl outline-none focus:ring-2 ring-blue-500 transition-all">
                 <input type="password" id="login-pass" placeholder="Password" class="w-full p-4 bg-slate-100 rounded-2xl outline-none focus:ring-2 ring-blue-500 transition-all">
-                <button id="btn-login-action" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl hover:bg-blue-700 transition-all shadow-lg">
-                    MASUK SISTEM
-                </button>
+                <button id="btn-login-action" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl hover:bg-blue-700 transition-all shadow-lg">MASUK SISTEM</button>
             </div>
         </div>
     </div>
 
     <div id="app-content" style="display: none;">
-        <header class="bg-blue-700 text-white p-4 sticky top-0 z-50 shadow-lg">
+        <header class="bg-blue-800 text-white p-4 sticky top-0 z-50 shadow-lg">
             <div class="flex justify-between items-center mb-4">
                 <div>
-                    <h1 class="font-black italic">BRILink POS PRO</h1>
+                    <h1 class="font-black italic text-yellow-400">BRILink RTDB</h1>
                     <p id="display-user" class="text-[9px] font-bold opacity-70"></p>
                 </div>
                 <button id="btn-logout" class="bg-red-500 px-3 py-1 rounded-lg text-xs font-bold shadow-md">LOGOUT</button>
             </div>
             
             <div class="flex overflow-x-auto gap-3 hide-scrollbar pb-2">
-                <div class="min-w-[120px] bg-white/10 p-3 rounded-xl border border-white/10">
-                    <p class="text-[8px] uppercase font-bold text-blue-200">Laci Fisik</p>
+                <div class="min-w-[130px] bg-white/10 p-3 rounded-xl border border-white/20">
+                    <p class="text-[8px] uppercase font-bold text-blue-200">Laci (Cash)</p>
                     <p id="val-laci" class="text-xs font-black">Rp 0</p>
                 </div>
-                <div class="min-w-[120px] bg-white/10 p-3 rounded-xl border border-white/10">
-                    <p class="text-[8px] uppercase font-bold text-blue-200">Saldo Rekening</p>
+                <div class="min-w-[130px] bg-white/10 p-3 rounded-xl border border-white/20">
+                    <p class="text-[8px] uppercase font-bold text-blue-200">Saldo Bank</p>
                     <p id="val-bri" class="text-xs font-black text-green-300">Rp 0</p>
                 </div>
-                <div class="min-w-[120px] bg-red-500/20 p-3 rounded-xl border border-red-500/20">
+                <div class="min-w-[130px] bg-red-900/30 p-3 rounded-xl border border-red-500/20">
                     <p class="text-[8px] uppercase font-bold text-red-200">Piutang</p>
                     <p id="val-hutang" class="text-xs font-black text-red-300">Rp 0</p>
                 </div>
@@ -61,13 +59,13 @@
                 </select>
                 <input type="number" id="trx-nominal" placeholder="Nominal Rp" class="w-full text-2xl font-black mb-4 outline-none p-2 bg-slate-50 rounded-xl focus:ring-2 ring-blue-500">
                 <div class="flex gap-2 mb-6">
-                    <div class="w-1/2">
-                        <label class="text-[8px] font-bold text-slate-400 ml-1">ADMIN PELANGGAN</label>
-                        <input type="number" id="trx-admin" value="5000" class="w-full p-2 border-b outline-none font-bold">
+                    <div class="w-1/2 text-center">
+                        <label class="text-[8px] font-bold text-slate-400">ADMIN CUST</label>
+                        <input type="number" id="trx-admin" value="5000" class="w-full p-2 border-b outline-none font-bold text-center">
                     </div>
-                    <div class="w-1/2">
-                        <label class="text-[8px] font-bold text-slate-400 ml-1">POTONGAN BANK</label>
-                        <input type="number" id="trx-potongan" value="0" class="w-full p-2 border-b outline-none font-bold">
+                    <div class="w-1/2 text-center">
+                        <label class="text-[8px] font-bold text-slate-400">POTONGAN BANK</label>
+                        <input type="number" id="trx-potongan" value="0" class="w-full p-2 border-b outline-none font-bold text-center">
                     </div>
                 </div>
                 <button id="btn-save-trx" class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl shadow-xl active:scale-95 transition-all uppercase text-xs">Simpan Transaksi</button>
@@ -75,14 +73,14 @@
 
             <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
                 <div class="p-4 bg-slate-50 flex justify-between items-center border-b">
-                    <span id="sync-status" class="text-[10px] font-black px-3 py-1 rounded-full bg-yellow-400">MEMUAT...</span>
-                    <button id="btn-sync-cloud" class="bg-blue-600 text-white text-[10px] px-4 py-2 rounded-full font-black shadow-lg">SYNC KE CLOUD</button>
+                    <span id="sync-status" class="text-[10px] font-black px-3 py-1 rounded-full bg-yellow-400">MENUNGGU</span>
+                    <button id="btn-sync-cloud" class="bg-blue-600 text-white text-[10px] px-4 py-2 rounded-full font-black shadow-lg">SYNC REALTIME</button>
                 </div>
                 <div id="list-riwayat" class="divide-y max-h-[300px] overflow-y-auto"></div>
             </div>
             
-            <button id="btn-export-excel" class="w-full bg-green-600 text-white font-black py-4 rounded-2xl text-xs uppercase shadow-lg shadow-green-100">
-                <i class="fas fa-file-excel mr-2"></i> Download Laporan Excel
+            <button id="btn-export-excel" class="w-full bg-green-600 text-white font-black py-4 rounded-2xl text-xs uppercase shadow-lg">
+                <i class="fas fa-file-excel mr-2"></i> Export Ke Excel
             </button>
         </main>
     </div>
@@ -90,11 +88,12 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getDatabase, ref, set, push, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDFUlHciJ3ms6bViuLbog2J66-k-oF4DLM",
             authDomain: "brilink-jaman-now.firebaseapp.com",
+            databaseURL: "https://brilink-jaman-now-default-rtdb.asia-southeast1.firebasedatabase.app/",
             projectId: "brilink-jaman-now",
             storageBucket: "brilink-jaman-now.firebasestorage.app",
             messagingSenderId: "856199740278",
@@ -103,51 +102,47 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
+        const rtdb = getDatabase(app);
 
         let state = JSON.parse(localStorage.getItem('brilink_v1')) || {
             saldo: { laci: 0, bri: 0, hutang: 0 },
             antrean: []
         };
 
-        // --- AUTH LOGIC (Tanpa eval / inline onclick) ---
+        // AUTH CHECK
         onAuthStateChanged(auth, (user) => {
             const modal = document.getElementById('modal-login');
             const appMain = document.getElementById('app-content');
             if (user) {
-                modal.style.setProperty('display', 'none', 'important');
-                appMain.style.setProperty('display', 'block', 'important');
-                document.getElementById('display-user').innerText = "KASIR: " + user.email;
+                modal.style.display = 'none';
+                appMain.style.display = 'block';
+                document.getElementById('display-user').innerText = "AKTIF: " + user.email;
                 renderUI();
             } else {
-                modal.style.setProperty('display', 'flex', 'important');
-                appMain.style.setProperty('display', 'none', 'important');
+                modal.style.display = 'flex';
+                appMain.style.display = 'none';
             }
         });
 
-        // --- EVENT LISTENERS (SOLUSI CSP) ---
+        // LOGIN ACTION
         document.getElementById('btn-login-action').addEventListener('click', async () => {
             const email = document.getElementById('login-email').value.trim();
             const pass = document.getElementById('login-pass').value;
             try {
                 await signInWithEmailAndPassword(auth, email, pass);
             } catch (e) {
-                alert("Login Ditolak: " + e.message);
+                alert("Gagal Masuk: " + e.message);
             }
         });
 
-        document.getElementById('btn-logout').addEventListener('click', () => {
-            if(state.antrean.length > 0) return alert("Sync data dulu!");
-            signOut(auth);
-        });
-
+        // SAVE TRANSACTION
         document.getElementById('btn-save-trx').addEventListener('click', () => {
             const j = document.getElementById('trx-jenis').value;
             const n = parseFloat(document.getElementById('trx-nominal').value) || 0;
             const a = parseFloat(document.getElementById('trx-admin').value) || 0;
             const p = parseFloat(document.getElementById('trx-potongan').value) || 0;
 
-            if(n <= 0) return alert("Isi nominal!");
+            if(n <= 0) return alert("Nominal harus diisi!");
 
             if(j === 'TRANSFER') {
                 state.saldo.bri -= (n + p);
@@ -167,31 +162,49 @@
             document.getElementById('trx-nominal').value = '';
         });
 
+        // SYNC REALTIME (Atomic Update)
         document.getElementById('btn-sync-cloud').addEventListener('click', async () => {
-            if(state.antrean.length === 0) return alert("Tidak ada data baru.");
+            if(state.antrean.length === 0) return alert("Data sudah sinkron.");
             const btn = document.getElementById('btn-sync-cloud');
             btn.innerText = "SINKRONISASI...";
             btn.disabled = true;
 
             try {
-                await setDoc(doc(db, "laporan", "realtime_saldo"), state.saldo);
-                for(let t of state.antrean) {
-                    await addDoc(collection(db, "transaksi"), {...t, server_time: new Date()});
-                }
+                const updates = {};
+                // Simpan Saldo ke node 'saldo_saat_ini'
+                updates['/saldo_saat_ini/'] = {
+                    ...state.saldo,
+                    terakhir_update: new Date().toISOString(),
+                    oleh: auth.currentUser.email
+                };
+
+                // Push transaksi ke node 'logs_transaksi'
+                state.antrean.forEach(t => {
+                    const newKey = push(ref(rtdb, 'logs_transaksi')).key;
+                    updates[`/logs_transaksi/${newKey}`] = { ...t, server_date: new Date().toISOString() };
+                });
+
+                await update(ref(rtdb), updates);
+                
                 state.antrean = [];
                 localStorage.setItem('brilink_v1', JSON.stringify(state));
                 renderUI();
-                alert("Berhasil Sinkron!");
-            } catch (e) { alert("Error: " + e.message); }
-            finally { btn.innerText = "SYNC KE CLOUD"; btn.disabled = false; }
+                alert("Berhasil Sinkron Realtime!");
+            } catch (e) {
+                alert("Error RTDB: " + e.message);
+            } finally {
+                btn.innerText = "SYNC REALTIME";
+                btn.disabled = false;
+            }
         });
 
+        document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+
         document.getElementById('btn-export-excel').addEventListener('click', () => {
-            if(state.antrean.length === 0) return alert("Antrean kosong.");
             const ws = XLSX.utils.json_to_sheet(state.antrean);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Laporan");
-            XLSX.writeFile(wb, "Laporan_BRILink.xlsx");
+            XLSX.writeFile(wb, "Laporan_Realtime.xlsx");
         });
 
         function renderUI() {
@@ -208,8 +221,8 @@
             `).join('');
 
             const s = document.getElementById('sync-status');
-            s.innerText = state.antrean.length > 0 ? `${state.antrean.length} PENDING` : "SUDAH SYNC";
-            s.className = `text-[10px] font-black px-3 py-1 rounded-full ${state.antrean.length > 0 ? 'bg-yellow-400' : 'bg-green-500 text-white'}`;
+            s.innerText = state.antrean.length > 0 ? `${state.antrean.length} PENDING` : "SINKRON";
+            s.className = `text-[10px] font-black px-3 py-1 rounded-full ${state.antrean.length > 0 ? 'bg-yellow-400 text-slate-900' : 'bg-green-500 text-white'}`;
         }
     </script>
 </body>
