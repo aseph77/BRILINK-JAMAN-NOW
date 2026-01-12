@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BRILink Manager Pro v3</title>
+    <title>BRILink Pro v3.3 - Master Data</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .active-tab { background: #1e40af; color: white; border-radius: 12px; }
-        .page { display: none; animation: fadeIn 0.3s ease; }
+        .active-nav { background: #1e40af; color: white; box-shadow: 0 10px 15px -3px rgba(30, 64, 175, 0.3); }
+        .page { display: none; animation: fadeIn 0.3s ease-out; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -20,213 +20,153 @@
 
     <div id="modal-login" class="fixed inset-0 z-[100] bg-slate-900 flex items-center justify-center p-6" style="display: none;">
         <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-md shadow-2xl text-center">
-            <div class="w-20 h-20 bg-blue-600 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-lg shadow-blue-200">
-                <i class="fas fa-university text-3xl text-white"></i>
-            </div>
-            <h2 class="text-2xl font-800 text-slate-800 mb-2">Selamat Datang</h2>
-            <p class="text-slate-400 text-sm mb-8">Masuk ke Sistem BRILink Jaman Now</p>
-            <div class="space-y-4">
-                <input type="email" id="login-email" placeholder="Email Petugas" class="w-full p-4 bg-slate-100 rounded-2xl outline-none focus:ring-2 ring-blue-600">
-                <input type="password" id="login-pass" placeholder="Password" class="w-full p-4 bg-slate-100 rounded-2xl outline-none focus:ring-2 ring-blue-600">
-                <button id="btn-login-action" class="w-full bg-blue-600 text-white font-800 py-4 rounded-2xl hover:bg-blue-700 transition-all">MASUK KE DASHBOARD</button>
+            <h2 class="text-xl font-800 text-slate-800 mb-8 uppercase">Login Petugas</h2>
+            <div class="space-y-3">
+                <input type="email" id="login-email" placeholder="Email" class="w-full p-4 bg-slate-100 rounded-2xl outline-none font-bold">
+                <input type="password" id="login-pass" placeholder="Password" class="w-full p-4 bg-slate-100 rounded-2xl outline-none font-bold">
+                <button id="btn-login-action" class="w-full bg-blue-600 text-white font-800 py-4 rounded-2xl shadow-lg">MASUK</button>
             </div>
         </div>
     </div>
 
-    <div id="modal-session" class="fixed inset-0 z-[90] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-6" style="display: none;">
-        <div class="bg-white p-8 rounded-[2rem] w-full max-w-md shadow-2xl">
-            <h2 class="text-xl font-800 mb-4 uppercase italic">Mulai Sesi Kasir</h2>
-            <p class="text-xs text-slate-500 mb-6">Masukkan modal awal uang tunai di laci saat ini.</p>
-            <input type="number" id="modal-awal" placeholder="Modal Tunai (Laci) Rp" class="w-full p-4 bg-slate-100 rounded-2xl mb-6 text-xl font-bold outline-none">
-            <button id="btn-start-session" class="w-full bg-green-600 text-white font-800 py-4 rounded-2xl">BUKA KASIR SEKARANG</button>
+    <div id="modal-session" class="fixed inset-0 z-[90] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4" style="display: none;">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-y-auto max-h-[90vh]">
+            <h2 class="text-lg font-800 mb-6 italic uppercase">Buka Sesi & Opname Saldo</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                <div class="p-3 bg-slate-50 rounded-2xl border"><label class="text-[8px] font-800 text-slate-400 uppercase">Laci</label><input type="number" id="start-laci" value="0" class="w-full bg-transparent font-black outline-none text-blue-700"></div>
+                <div class="p-3 bg-slate-50 rounded-2xl border"><label class="text-[8px] font-800 text-slate-400 uppercase">BRI</label><input type="number" id="start-bri" value="0" class="w-full bg-transparent font-black outline-none text-blue-700"></div>
+                <div class="p-3 bg-slate-50 rounded-2xl border"><label class="text-[8px] font-800 text-slate-400 uppercase">DANA</label><input type="number" id="start-dana" value="0" class="w-full bg-transparent font-black outline-none text-blue-700"></div>
+                <div class="p-3 bg-slate-50 rounded-2xl border"><label class="text-[8px] font-800 text-slate-400 uppercase">PULSA</label><input type="number" id="start-pulsa" value="0" class="w-full bg-transparent font-black outline-none text-blue-700"></div>
+            </div>
+            <button id="btn-start-session" class="w-full bg-blue-600 text-white font-800 py-4 rounded-2xl shadow-xl">MULAI KASIR</button>
         </div>
     </div>
 
     <div id="app-content" class="flex flex-col md:flex-row min-h-screen" style="display: none;">
         
-        <aside class="hidden md:flex flex-col w-64 bg-blue-900 text-white p-6 sticky top-0 h-screen">
-            <div class="mb-10 px-2">
-                <h1 class="text-2xl font-800 italic tracking-tighter">BRILink <span class="text-yellow-400 font-bold italic">PRO</span></h1>
-                <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest mt-1">Version 3.0 Stable</p>
-            </div>
+        <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-white p-6 sticky top-0 h-screen">
+            <h1 class="text-xl font-800 italic mb-10">BRILink <span class="text-yellow-400">PRO</span></h1>
             <nav class="space-y-2 flex-1">
-                <button onclick="nav('page-home')" class="nav-btn w-full flex items-center gap-4 p-4 hover:bg-white/10 transition-all text-sm font-bold active-tab">
-                    <i class="fas fa-th-large w-5"></i> Dashboard
-                </button>
-                <button onclick="nav('page-history')" class="nav-btn w-full flex items-center gap-4 p-4 hover:bg-white/10 transition-all text-sm font-bold">
-                    <i class="fas fa-exchange-alt w-5"></i> Riwayat Trx
-                </button>
-                <button onclick="nav('page-debt')" class="nav-btn w-full flex items-center gap-4 p-4 hover:bg-white/10 transition-all text-sm font-bold">
-                    <i class="fas fa-hand-holding-usd w-5"></i> Data Hutang
-                </button>
-                <button onclick="nav('page-report')" class="nav-btn w-full flex items-center gap-4 p-4 hover:bg-white/10 transition-all text-sm font-bold">
-                    <i class="fas fa-chart-line w-5"></i> Laporan
-                </button>
-                <button onclick="nav('page-account')" class="nav-btn w-full flex items-center gap-4 p-4 hover:bg-white/10 transition-all text-sm font-bold">
-                    <i class="fas fa-user-cog w-5"></i> Kelola Akun
-                </button>
+                <button onclick="nav('page-home')" class="nav-btn w-full flex items-center gap-4 p-4 text-xs font-bold rounded-2xl active-nav" data-page="page-home"><i class="fas fa-th-large"></i> Dashboard</button>
+                <button onclick="nav('page-master')" class="nav-btn w-full flex items-center gap-4 p-4 text-xs font-bold rounded-2xl" data-page="page-master"><i class="fas fa-database"></i> Master Data</button>
+                <button onclick="nav('page-history')" class="nav-btn w-full flex items-center gap-4 p-4 text-xs font-bold rounded-2xl" data-page="page-history"><i class="fas fa-history"></i> Riwayat</button>
+                <button onclick="nav('page-debt')" class="nav-btn w-full flex items-center gap-4 p-4 text-xs font-bold rounded-2xl" data-page="page-debt"><i class="fas fa-user-clock"></i> Hutang</button>
             </nav>
-            <button id="btn-end-session" class="mt-auto bg-red-500/20 text-red-300 p-4 rounded-2xl font-bold text-xs hover:bg-red-500 hover:text-white transition-all">
-                <i class="fas fa-power-off mr-2"></i> AKHIRI SESI
-            </button>
+            <button id="btn-end-session" class="bg-red-500/10 text-red-400 p-4 rounded-2xl text-[10px] font-800 mt-auto">TUTUP KASIR</button>
         </aside>
 
-        <main class="flex-1 overflow-x-hidden">
-            
-            <header class="bg-white border-b p-4 md:p-6 flex justify-between items-center sticky top-0 z-40">
-                <div class="md:hidden">
-                    <h1 class="font-800 italic text-blue-800">BRILink <span class="text-yellow-500">PRO</span></h1>
-                </div>
-                <div class="hidden md:block">
-                    <h2 id="page-title" class="text-lg font-800 text-slate-800">Dashboard Utama</h2>
-                </div>
-                <div class="flex items-center gap-3">
-                    <div class="text-right hidden sm:block">
-                        <p id="user-name" class="text-[10px] font-800 text-slate-800">Petugas Kasir</p>
-                        <p id="session-time" class="text-[9px] text-green-500 font-bold">Sesi Aktif: 00:00</p>
-                    </div>
-                    <div class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center border shadow-sm">
-                        <i class="fas fa-user text-slate-400"></i>
-                    </div>
-                </div>
+        <main class="flex-1 pb-24 md:pb-8 overflow-y-auto">
+            <header class="bg-white/80 backdrop-blur-md border-b p-4 md:p-6 sticky top-0 z-40 flex justify-between items-center">
+                <h2 id="page-title" class="text-sm font-800 text-slate-800 uppercase tracking-tighter">Dashboard</h2>
+                <p id="user-display" class="text-[10px] font-800 text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase leading-none"></p>
             </header>
 
-            <div class="p-4 md:p-8">
+            <div class="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
                 
                 <div id="page-home" class="page active space-y-6">
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="bg-blue-600 p-5 rounded-[2rem] text-white shadow-xl shadow-blue-100">
-                            <p class="text-[9px] font-bold uppercase opacity-70 mb-1">Kas Laci (Fisik)</p>
-                            <h3 id="stat-laci" class="text-lg font-800">Rp 0</h3>
-                        </div>
-                        <div class="bg-white p-5 rounded-[2rem] border shadow-sm">
-                            <p class="text-[9px] font-bold uppercase text-slate-400 mb-1">Saldo Bank BRI</p>
-                            <h3 id="stat-bri" class="text-lg font-800 text-blue-800">Rp 0</h3>
-                        </div>
-                        <div class="bg-white p-5 rounded-[2rem] border shadow-sm">
-                            <p class="text-[9px] font-bold uppercase text-slate-400 mb-1">Laba Hari Ini</p>
-                            <h3 id="stat-laba" class="text-lg font-800 text-green-600">Rp 0</h3>
-                        </div>
-                        <div class="bg-red-50 p-5 rounded-[2rem] border-red-100 border shadow-sm">
-                            <p class="text-[9px] font-bold uppercase text-red-400 mb-1">Piutang (Hutang)</p>
-                            <h3 id="stat-hutang" class="text-lg font-800 text-red-600">Rp 0</h3>
-                        </div>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div class="bg-blue-600 p-4 rounded-3xl text-white shadow-lg"><p class="text-[8px] font-bold opacity-60 uppercase mb-1">Laci</p><h3 id="stat-laci" class="text-md font-800">Rp 0</h3></div>
+                        <div class="bg-white p-4 rounded-3xl border shadow-sm"><p class="text-[8px] font-bold text-slate-400 uppercase mb-1">BRI</p><h3 id="stat-bri" class="text-md font-800 text-blue-700">Rp 0</h3></div>
+                        <div class="bg-white p-4 rounded-3xl border shadow-sm"><p class="text-[8px] font-bold text-slate-400 uppercase mb-1">DANA</p><h3 id="stat-dana" class="text-md font-800 text-blue-500">Rp 0</h3></div>
+                        <div class="bg-white p-4 rounded-3xl border shadow-sm"><p class="text-[8px] font-bold text-slate-400 uppercase mb-1">Pulsa</p><h3 id="stat-pulsa" class="text-md font-800 text-orange-600">Rp 0</h3></div>
                     </div>
 
-                    <div class="bg-white p-6 md:p-10 rounded-[2.5rem] border shadow-sm max-w-2xl">
-                        <div class="flex gap-2 mb-8 bg-slate-100 p-1 rounded-2xl">
-                            <button onclick="setType('TRANSFER')" id="t-TRANSFER" class="flex-1 py-3 text-[10px] font-800 rounded-xl transition-all bg-white shadow text-blue-700">TRANSFER</button>
-                            <button onclick="setType('TARIK')" id="t-TARIK" class="flex-1 py-3 text-[10px] font-800 rounded-xl transition-all text-slate-500">TARIK TUNAI</button>
+                    <div class="bg-white p-6 md:p-8 rounded-[2.5rem] border shadow-sm max-w-xl mx-auto">
+                        <div class="flex gap-1 mb-6 bg-slate-100 p-1 rounded-2xl overflow-x-auto hide-scrollbar">
+                            <button onclick="setType('TRANSFER')" id="t-TRANSFER" class="flex-1 py-3 text-[9px] font-800 rounded-xl bg-white shadow text-blue-700">TRANSFER</button>
+                            <button onclick="setType('TARIK')" id="t-TARIK" class="flex-1 py-3 text-[9px] font-800 rounded-xl text-slate-400 uppercase">Tarik</button>
+                            <button onclick="setType('PULSA')" id="t-PULSA" class="flex-1 py-3 text-[9px] font-800 rounded-xl text-slate-400 uppercase">Pulsa/Data</button>
                         </div>
-                        <div class="space-y-5">
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-800 text-slate-400 uppercase ml-2">Nominal Transaksi</label>
-                                <input type="number" id="inp-nominal" placeholder="Rp 0" class="w-full p-5 bg-slate-50 rounded-[1.5rem] text-3xl font-800 outline-none focus:ring-4 ring-blue-50 transition-all">
+
+                        <div class="space-y-4">
+                            <div id="box-search-produk" class="hidden space-y-2">
+                                <label class="text-[9px] font-800 text-slate-400 uppercase ml-2">Cari Produk Master</label>
+                                <input type="text" id="inp-search-produk" placeholder="Ketik nama produk..." class="w-full p-4 bg-blue-50 rounded-2xl font-bold outline-none border border-blue-100 shadow-inner">
+                                <div id="search-results" class="max-h-40 overflow-y-auto hidden border rounded-2xl bg-white divide-y"></div>
                             </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="space-y-2">
-                                    <label class="text-[10px] font-800 text-slate-400 uppercase ml-2">Admin Pelanggan</label>
-                                    <input type="number" id="inp-admin" value="5000" class="w-full p-4 bg-slate-50 rounded-2xl font-bold outline-none border border-transparent focus:border-blue-200">
+
+                            <div id="box-nominal-manual" class="space-y-4">
+                                <div class="space-y-1">
+                                    <label class="text-[9px] font-800 text-slate-400 uppercase ml-2">Nominal / Harga Jual</label>
+                                    <input type="number" id="inp-nominal" placeholder="Rp 0" class="w-full p-4 bg-slate-50 rounded-2xl text-2xl font-800 outline-none border">
                                 </div>
-                                <div class="space-y-2">
-                                    <label class="text-[10px] font-800 text-slate-400 uppercase ml-2">Biaya Bank</label>
-                                    <input type="number" id="inp-biaya" value="3000" class="w-full p-4 bg-slate-50 rounded-2xl font-bold outline-none border border-transparent focus:border-blue-200">
+                                <div id="box-modal" class="hidden grid grid-cols-2 gap-3">
+                                    <div class="p-3 bg-orange-50 rounded-2xl border border-orange-100">
+                                        <label class="text-[8px] font-800 text-orange-400 uppercase">Harga Modal</label>
+                                        <input type="number" id="inp-modal-manual" value="0" class="w-full bg-transparent font-bold outline-none">
+                                    </div>
+                                    <div class="p-3 bg-slate-50 rounded-2xl border flex items-center justify-center italic text-[10px] text-slate-400">Manual Input</div>
+                                </div>
+                                <div id="box-admin" class="grid grid-cols-2 gap-3">
+                                    <div class="p-3 bg-slate-50 rounded-2xl border">
+                                        <label class="text-[8px] font-800 text-slate-400 uppercase">Admin Cust</label>
+                                        <input type="number" id="inp-admin" value="5000" class="w-full bg-transparent font-bold outline-none">
+                                    </div>
+                                    <div class="p-3 bg-slate-50 rounded-2xl border">
+                                        <label class="text-[8px] font-800 text-slate-400 uppercase">Biaya Bank</label>
+                                        <input type="number" id="inp-biaya" value="3000" class="w-full bg-transparent font-bold outline-none">
+                                    </div>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-3 p-4 bg-red-50 rounded-2xl border border-red-100">
-                                <input type="checkbox" id="inp-hutang" class="w-5 h-5 accent-red-600">
-                                <label for="inp-hutang" class="text-xs font-bold text-red-700 uppercase cursor-pointer">Catat Sebagai Hutang</label>
+
+                            <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border cursor-pointer">
+                                <input type="checkbox" id="inp-hutang" class="w-5 h-5 accent-blue-600"><label for="inp-hutang" class="text-[10px] font-800 text-slate-600 uppercase tracking-tighter leading-none mt-1">Simpan Sebagai Hutang</label>
                             </div>
-                            <button id="btn-save" class="w-full bg-slate-900 text-white font-800 py-5 rounded-[1.5rem] shadow-xl hover:bg-blue-600 transition-all uppercase tracking-widest text-xs">Simpan Transaksi</button>
+
+                            <button id="btn-save" class="w-full bg-slate-900 text-white font-800 py-5 rounded-2xl shadow-xl hover:bg-blue-600 transition-all uppercase text-[10px] tracking-widest">Simpan Transaksi</button>
                         </div>
+                    </div>
+                </div>
+
+                <div id="page-master" class="page space-y-6">
+                    <div class="bg-white p-6 rounded-[2rem] border shadow-sm">
+                        <h3 class="text-xs font-800 uppercase mb-6 tracking-widest">Tambah Produk Baru</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                            <input type="text" id="m-nama" placeholder="Nama Produk (Contoh: TSEL 10K)" class="p-4 bg-slate-50 rounded-2xl text-xs font-bold outline-none border focus:ring-2 ring-blue-100">
+                            <input type="number" id="m-modal" placeholder="Harga Modal" class="p-4 bg-slate-50 rounded-2xl text-xs font-bold outline-none border focus:ring-2 ring-blue-100">
+                            <input type="number" id="m-jual" placeholder="Harga Jual" class="p-4 bg-slate-50 rounded-2xl text-xs font-bold outline-none border focus:ring-2 ring-blue-100">
+                        </div>
+                        <button id="btn-add-master" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-800 text-[10px] uppercase shadow-lg">Simpan Ke Master</button>
+                    </div>
+
+                    <div class="bg-white rounded-[2rem] border overflow-hidden shadow-sm">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-400 font-800 uppercase">
+                                <tr>
+                                    <th class="p-4">Nama Produk</th>
+                                    <th class="p-4">Modal</th>
+                                    <th class="p-4">Jual</th>
+                                    <th class="p-4">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="list-master-body" class="divide-y"></tbody>
+                        </table>
                     </div>
                 </div>
 
                 <div id="page-history" class="page space-y-4">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-800 text-slate-800 uppercase text-xs tracking-widest">Daftar Transaksi Terbaru</h3>
-                        <button id="btn-sync" class="bg-blue-600 text-white text-[10px] px-4 py-2 rounded-full font-800">SYNC CLOUD</button>
-                    </div>
-                    <div id="list-history" class="grid gap-3">
-                        </div>
+                    <div id="list-history" class="grid gap-3"></div>
                 </div>
-
                 <div id="page-debt" class="page space-y-4">
-                    <h3 class="font-800 text-red-600 uppercase text-xs tracking-widest">Daftar Piutang Pelanggan</h3>
-                    <div id="list-debt" class="grid gap-3">
-                        </div>
-                </div>
-
-                <div id="page-report" class="page space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-white p-6 rounded-3xl border text-center">
-                            <p class="text-[10px] font-bold text-slate-400 mb-2">OMSET HARI INI</p>
-                            <h4 id="rep-omset" class="text-xl font-800">Rp 0</h4>
-                        </div>
-                        <div class="bg-white p-6 rounded-3xl border text-center border-green-100">
-                            <p class="text-[10px] font-bold text-green-400 mb-2">LABA BERSIH</p>
-                            <h4 id="rep-laba" class="text-xl font-800 text-green-600">Rp 0</h4>
-                        </div>
-                        <div class="bg-white p-6 rounded-3xl border text-center">
-                            <p class="text-[10px] font-bold text-slate-400 mb-2">TOTAL TRX</p>
-                            <h4 id="rep-count" class="text-xl font-800 text-blue-600">0</h4>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-3xl border">
-                        <h4 class="text-xs font-800 mb-4 uppercase">Laporan Per Petugas</h4>
-                        <div id="list-user-report" class="divide-y text-xs"></div>
-                    </div>
-                </div>
-
-                <div id="page-account" class="page max-w-lg mx-auto">
-                    <div class="bg-white p-8 rounded-[2rem] border shadow-sm space-y-6">
-                        <div class="text-center mb-6">
-                            <div class="w-20 h-20 bg-slate-100 rounded-full mx-auto mb-3 flex items-center justify-center border text-slate-300">
-                                <i class="fas fa-user-cog text-3xl"></i>
-                            </div>
-                            <h4 class="font-800 text-slate-800">Pengaturan Sistem</h4>
-                        </div>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 ml-1">Saldo Awal Bank BRI (Digital)</label>
-                                <input type="number" id="set-bri" class="w-full p-4 bg-slate-50 rounded-2xl font-bold border outline-none">
-                            </div>
-                            <button onclick="updateSettings()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-sm">Update Konfigurasi</button>
-                            <hr>
-                            <button id="btn-logout" class="w-full bg-red-50 text-red-600 py-4 rounded-2xl font-bold text-sm">Keluar dari Akun</button>
-                        </div>
-                    </div>
+                    <div id="list-debt" class="grid gap-3"></div>
                 </div>
 
             </div>
         </main>
 
-        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t px-6 py-3 flex justify-between items-center z-50">
-            <button onclick="nav('page-home')" class="flex flex-col items-center gap-1 text-blue-600">
-                <i class="fas fa-home text-lg"></i>
-                <span class="text-[8px] font-bold uppercase tracking-widest">Home</span>
-            </button>
-            <button onclick="nav('page-history')" class="flex flex-col items-center gap-1 text-slate-400">
-                <i class="fas fa-history text-lg"></i>
-                <span class="text-[8px] font-bold uppercase tracking-widest">Riwayat</span>
-            </button>
-            <button onclick="nav('page-debt')" class="flex flex-col items-center gap-1 text-slate-400">
-                <i class="fas fa-user-clock text-lg"></i>
-                <span class="text-[8px] font-bold uppercase tracking-widest">Hutang</span>
-            </button>
-            <button onclick="nav('page-report')" class="flex flex-col items-center gap-1 text-slate-400">
-                <i class="fas fa-chart-pie text-lg"></i>
-                <span class="text-[8px] font-bold uppercase tracking-widest">Laporan</span>
-            </button>
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t px-6 py-4 flex justify-between items-center z-50 rounded-t-3xl shadow-2xl">
+            <button onclick="nav('page-home')" class="flex flex-col items-center gap-1 text-blue-600"><i class="fas fa-home"></i><span class="text-[7px] font-800 uppercase">Home</span></button>
+            <button onclick="nav('page-master')" class="flex flex-col items-center gap-1 text-slate-300"><i class="fas fa-database"></i><span class="text-[7px] font-800 uppercase">Master</span></button>
+            <button onclick="nav('page-history')" class="flex flex-col items-center gap-1 text-slate-300"><i class="fas fa-history"></i><span class="text-[7px] font-800 uppercase">Riwayat</span></button>
+            <button onclick="nav('page-debt')" class="flex flex-col items-center gap-1 text-slate-300"><i class="fas fa-user-clock"></i><span class="text-[7px] font-800 uppercase">Hutang</span></button>
         </nav>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, set, push, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Konfigurasi RTDB Anda
         const firebaseConfig = {
             apiKey: "AIzaSyDFUlHciJ3ms6bViuLbog2J66-k-oF4DLM",
             authDomain: "brilink-jaman-now.firebaseapp.com",
@@ -241,198 +181,176 @@
         const auth = getAuth(app);
         const rtdb = getDatabase(app);
 
-        let currentUser = null;
-        let currentType = 'TRANSFER';
-        let state = JSON.parse(localStorage.getItem('brilink_pro_v3')) || {
-            session: { active: false, start_time: null, modal_awal: 0 },
-            saldo: { laci: 0, bri: 0, hutang: 0 },
-            logs: []
+        let activeType = 'TRANSFER';
+        let state = JSON.parse(localStorage.getItem('brilink_pro_v3_3')) || {
+            session: { active: false },
+            saldo: { laci: 0, bri: 0, dana: 0, pulsa: 0, hutang: 0 },
+            logs: [],
+            master_data: [] // [{nama, modal, jual}]
         };
 
-        // NAVIGATION LOGIC
-        window.nav = (pageId) => {
+        // NAV
+        window.nav = (id) => {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            
-            // UI Update for sidebar
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-tab'));
-            const titles = {'page-home': 'Dashboard Utama', 'page-history': 'Riwayat Transaksi', 'page-debt': 'Manajemen Hutang', 'page-report': 'Laporan Keuangan', 'page-account': 'Pengaturan'};
-            document.getElementById('page-title').innerText = titles[pageId];
+            document.getElementById(id).classList.add('active');
+            document.getElementById('page-title').innerText = id.replace('page-', '').toUpperCase();
             renderUI();
         };
 
+        // TYPE SWITCHER
         window.setType = (type) => {
-            currentType = type;
-            document.getElementById('t-TRANSFER').className = type === 'TRANSFER' ? 'flex-1 py-3 text-[10px] font-800 rounded-xl bg-white shadow text-blue-700' : 'flex-1 py-3 text-[10px] font-800 rounded-xl text-slate-500';
-            document.getElementById('t-TARIK').className = type === 'TARIK' ? 'flex-1 py-3 text-[10px] font-800 rounded-xl bg-white shadow text-blue-700' : 'flex-1 py-3 text-[10px] font-800 rounded-xl text-slate-500';
+            activeType = type;
+            const searchBox = document.getElementById('box-search-produk');
+            const adminBox = document.getElementById('box-admin');
+            const modalBox = document.getElementById('box-modal');
+            
+            ['TRANSFER', 'TARIK', 'PULSA'].forEach(t => {
+                document.getElementById('t-'+t).className = t === type ? 'flex-1 py-3 text-[9px] font-800 rounded-xl bg-white shadow text-blue-700' : 'flex-1 py-3 text-[9px] font-800 rounded-xl text-slate-400 uppercase';
+            });
+
+            if(type === 'PULSA') {
+                searchBox.classList.remove('hidden');
+                modalBox.classList.remove('hidden');
+                adminBox.classList.add('hidden');
+            } else {
+                searchBox.classList.add('hidden');
+                modalBox.classList.add('hidden');
+                adminBox.classList.remove('hidden');
+            }
         };
 
-        // AUTH & SESSION CHECK
+        // MASTER DATA LOGIC
+        document.getElementById('btn-add-master').addEventListener('click', () => {
+            const nama = document.getElementById('m-nama').value;
+            const modal = parseFloat(document.getElementById('m-modal').value) || 0;
+            const jual = parseFloat(document.getElementById('m-jual').value) || 0;
+            if(!nama) return alert("Nama produk wajib!");
+            state.master_data.push({ nama, modal, jual });
+            save();
+            document.getElementById('m-nama').value = '';
+            document.getElementById('m-modal').value = '';
+            document.getElementById('m-jual').value = '';
+        });
+
+        window.deleteMaster = (idx) => {
+            state.master_data.splice(idx, 1);
+            save();
+        };
+
+        // SEARCH PRODUCT LOGIC
+        document.getElementById('inp-search-produk').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            const resultsBox = document.getElementById('search-results');
+            if(!val) return resultsBox.classList.add('hidden');
+
+            const filtered = state.master_data.filter(p => p.nama.toLowerCase().includes(val));
+            resultsBox.innerHTML = filtered.map(p => `
+                <div onclick="pickProduct('${p.nama}', ${p.modal}, ${p.jual})" class="p-4 hover:bg-blue-50 cursor-pointer flex justify-between">
+                    <span class="font-800 text-xs">${p.nama}</span>
+                    <span class="text-[10px] text-blue-600 font-bold tracking-tighter">Rp ${p.jual.toLocaleString()}</span>
+                </div>
+            `).join('');
+            resultsBox.classList.remove('hidden');
+        });
+
+        window.pickProduct = (nama, modal, jual) => {
+            document.getElementById('inp-search-produk').value = nama;
+            document.getElementById('inp-nominal').value = jual;
+            document.getElementById('inp-modal-manual').value = modal;
+            document.getElementById('search-results').classList.add('hidden');
+        };
+
+        // SAVE TRANSACTION
+        document.getElementById('btn-save').addEventListener('click', () => {
+            const isHutang = document.getElementById('inp-hutang').checked;
+            let nom = parseFloat(document.getElementById('inp-nominal').value) || 0;
+            let laba = 0, adm = 0;
+
+            if (activeType === 'PULSA') {
+                const modal = parseFloat(document.getElementById('inp-modal-manual').value) || 0;
+                laba = nom - modal;
+                state.saldo.pulsa -= modal;
+                if(!isHutang) state.saldo.laci += nom;
+            } else {
+                adm = parseFloat(document.getElementById('inp-admin').value) || 0;
+                const bia = parseFloat(document.getElementById('inp-biaya').value) || 0;
+                if(activeType === 'TRANSFER') {
+                    laba = adm - bia;
+                    state.saldo.bri -= (nom + bia);
+                    if(!isHutang) state.saldo.laci += (nom + adm);
+                } else {
+                    laba = adm;
+                    state.saldo.bri += nom;
+                    state.saldo.laci -= (nom - adm);
+                }
+            }
+
+            if(isHutang) state.saldo.hutang += (activeType === 'TRANSFER' ? nom + adm : nom);
+
+            state.logs.push({ id: Date.now(), type: activeType, nominal: nom, laba, isHutang, waktu: new Date().toLocaleTimeString('id-ID') });
+            save();
+            alert("Transaksi Berhasil!");
+        });
+
+        // CORE UTILS
+        function save() {
+            localStorage.setItem('brilink_pro_v3_3', JSON.stringify(state));
+            renderUI();
+        }
+
+        function renderUI() {
+            document.getElementById('stat-laci').innerText = "Rp " + state.saldo.laci.toLocaleString();
+            document.getElementById('stat-bri').innerText = "Rp " + state.saldo.bri.toLocaleString();
+            document.getElementById('stat-dana').innerText = "Rp " + state.saldo.dana.toLocaleString();
+            document.getElementById('stat-pulsa').innerText = "Rp " + state.saldo.pulsa.toLocaleString();
+
+            const masterBody = document.getElementById('list-master-body');
+            masterBody.innerHTML = state.master_data.map((p, i) => `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-4 font-bold text-slate-700">${p.nama}</td>
+                    <td class="p-4 text-slate-400">Rp ${p.modal.toLocaleString()}</td>
+                    <td class="p-4 text-blue-600 font-bold">Rp ${p.jual.toLocaleString()}</td>
+                    <td class="p-4"><button onclick="deleteMaster(${i})" class="text-red-400 p-2"><i class="fas fa-trash"></i></button></td>
+                </tr>
+            `).join('');
+
+            const histList = document.getElementById('list-history');
+            histList.innerHTML = state.logs.slice().reverse().map(l => `
+                <div class="bg-white p-4 rounded-2xl border flex justify-between items-center">
+                    <div><p class="text-[9px] font-800 text-slate-400 uppercase">${l.type}</p><h4 class="font-800 text-sm">Rp ${l.nominal.toLocaleString()}</h4></div>
+                    <div class="text-right"><p class="text-[8px] font-bold text-slate-400 uppercase">Laba</p><p class="text-xs font-800 text-green-600">Rp ${l.laba.toLocaleString()}</p></div>
+                </div>
+            `).join('');
+        }
+
+        // INIT AUTH & SESSION
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                currentUser = user;
                 document.getElementById('modal-login').style.display = 'none';
                 document.getElementById('app-content').style.display = 'flex';
-                document.getElementById('user-name').innerText = user.email.split('@')[0].toUpperCase();
-                
-                if(!state.session.active) {
-                    document.getElementById('modal-session').style.display = 'flex';
-                }
+                document.getElementById('user-display').innerText = user.email.split('@')[0];
+                if(!state.session.active) document.getElementById('modal-session').style.display = 'flex';
                 renderUI();
             } else {
                 document.getElementById('modal-login').style.display = 'flex';
-                document.getElementById('app-content').style.display = 'none';
             }
         });
 
         document.getElementById('btn-login-action').addEventListener('click', async () => {
             const e = document.getElementById('login-email').value;
             const p = document.getElementById('login-pass').value;
-            try { await signInWithEmailAndPassword(auth, e, p); } catch(err) { alert(err.message); }
+            try { await signInWithEmailAndPassword(auth, e, p); } catch(err) { alert("Error!"); }
         });
 
         document.getElementById('btn-start-session').addEventListener('click', () => {
-            const modal = parseFloat(document.getElementById('modal-awal').value) || 0;
-            state.session = { active: true, start_time: new Date().toISOString(), modal_awal: modal };
-            state.saldo.laci = modal;
+            state.saldo.laci = parseFloat(document.getElementById('start-laci').value) || 0;
+            state.saldo.bri = parseFloat(document.getElementById('start-bri').value) || 0;
+            state.saldo.dana = parseFloat(document.getElementById('start-dana').value) || 0;
+            state.saldo.pulsa = parseFloat(document.getElementById('start-pulsa').value) || 0;
+            state.session.active = true;
             document.getElementById('modal-session').style.display = 'none';
-            saveState();
+            save();
         });
-
-        // CORE TRANSACTION LOGIC
-        document.getElementById('btn-save').addEventListener('click', () => {
-            const nom = parseFloat(document.getElementById('inp-nominal').value) || 0;
-            const adm = parseFloat(document.getElementById('inp-admin').value) || 0;
-            const bia = parseFloat(document.getElementById('inp-biaya').value) || 0;
-            const hut = document.getElementById('inp-hutang').checked;
-
-            if(nom <= 0) return alert("Isi nominal!");
-
-            let laba = 0;
-            if(currentType === 'TRANSFER') {
-                laba = adm - bia;
-                state.saldo.bri -= (nom + bia);
-                if(!hut) state.saldo.laci += (nom + adm);
-            } else {
-                laba = adm;
-                state.saldo.bri += nom;
-                state.saldo.laci -= (nom - adm);
-            }
-
-            if(hut) state.saldo.hutang += (nom + (currentType === 'TRANSFER' ? adm : 0));
-
-            state.logs.push({
-                id: Date.now(),
-                type: currentType,
-                nominal: nom,
-                admin: adm,
-                laba: laba,
-                isHutang: hut,
-                petugas: currentUser.email,
-                waktu: new Date().toLocaleTimeString('id-ID')
-            });
-
-            saveState();
-            document.getElementById('inp-nominal').value = '';
-            document.getElementById('inp-hutang').checked = false;
-            alert("Transaksi Berhasil!");
-        });
-
-        // DEBT MANAGEMENT
-        window.payDebt = (id) => {
-            const index = state.logs.findIndex(l => l.id === id);
-            if(index !== -1) {
-                const item = state.logs[index];
-                state.saldo.laci += (item.nominal + (item.type === 'TRANSFER' ? item.admin : 0));
-                state.saldo.hutang -= (item.nominal + (item.type === 'TRANSFER' ? item.admin : 0));
-                state.logs[index].isHutang = false;
-                saveState();
-            }
-        };
-
-        // SESSION END
-        document.getElementById('btn-end-session').addEventListener('click', () => {
-            if(confirm("Akhiri Sesi? Semua data harus di-Sync ke Cloud sebelum log-out.")){
-                const fisik = prompt("Masukkan total uang fisik di laci saat ini:");
-                const selisih = (parseFloat(fisik) || 0) - state.saldo.laci;
-                alert(`Sesi Berakhir.\nSesuai Sistem: Rp ${state.saldo.laci.toLocaleString()}\nFisik: Rp ${parseFloat(fisik).toLocaleString()}\nSelisih: Rp ${selisih.toLocaleString()}`);
-                state.session.active = false;
-                saveState();
-                location.reload();
-            }
-        });
-
-        function saveState() {
-            localStorage.setItem('brilink_pro_v3', JSON.stringify(state));
-            renderUI();
-        }
-
-        function renderUI() {
-            // Stats
-            document.getElementById('stat-laci').innerText = "Rp " + state.saldo.laci.toLocaleString();
-            document.getElementById('stat-bri').innerText = "Rp " + state.saldo.bri.toLocaleString();
-            document.getElementById('stat-hutang').innerText = "Rp " + state.saldo.hutang.toLocaleString();
-            
-            const totalLaba = state.logs.reduce((acc, curr) => acc + curr.laba, 0);
-            document.getElementById('stat-laba').innerText = "Rp " + totalLaba.toLocaleString();
-            
-            // History
-            const histList = document.getElementById('list-history');
-            histList.innerHTML = state.logs.slice().reverse().map(l => `
-                <div class="bg-white p-4 rounded-2xl border flex justify-between items-center">
-                    <div>
-                        <p class="text-[10px] font-800 ${l.type === 'TRANSFER' ? 'text-blue-600' : 'text-orange-500'} uppercase">${l.type} ${l.isHutang ? '<span class="text-red-500">(HUTANG)</span>' : ''}</p>
-                        <h4 class="font-800 text-sm">Rp ${l.nominal.toLocaleString()}</h4>
-                        <p class="text-[9px] text-slate-400 font-bold">${l.waktu} • Petugas: ${l.petugas.split('@')[0]}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[9px] font-bold text-slate-400">LABA</p>
-                        <p class="text-xs font-800 text-green-600">Rp ${l.laba.toLocaleString()}</p>
-                    </div>
-                </div>
-            `).join('');
-
-            // Debt List
-            const debtList = document.getElementById('list-debt');
-            const debts = state.logs.filter(l => l.isHutang);
-            debtList.innerHTML = debts.length ? debts.map(d => `
-                <div class="bg-white p-4 rounded-2xl border border-red-100 flex justify-between items-center">
-                    <div>
-                        <p class="text-[9px] font-800 text-red-500 uppercase">Tagihan: ${d.type}</p>
-                        <h4 class="font-800 text-sm">Rp ${(d.nominal + (d.type === 'TRANSFER' ? d.admin : 0)).toLocaleString()}</h4>
-                    </div>
-                    <button onclick="payDebt(${d.id})" class="bg-green-600 text-white px-4 py-2 rounded-xl text-[10px] font-800">LUNASKAN</button>
-                </div>
-            `).join('') : '<p class="text-xs text-center text-slate-400 py-10">Tidak ada hutang aktif.</p>';
-
-            // Report logic (Simple)
-            document.getElementById('rep-omset').innerText = "Rp " + state.logs.reduce((a,b) => a+b.nominal, 0).toLocaleString();
-            document.getElementById('rep-laba').innerText = "Rp " + totalLaba.toLocaleString();
-            document.getElementById('rep-count').innerText = state.logs.length;
-        }
-
-        window.updateSettings = () => {
-            const bri = parseFloat(document.getElementById('set-bri').value) || 0;
-            state.saldo.bri = bri;
-            saveState();
-            alert("Setting diperbarui!");
-        };
-
-        document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
-        document.getElementById('btn-sync').addEventListener('click', async () => {
-            const btn = document.getElementById('btn-sync');
-            btn.innerText = "UPDATING...";
-            try {
-                await update(ref(rtdb, 'monitoring/' + currentUser.uid), {
-                    saldo: state.saldo,
-                    logs: state.logs,
-                    last_update: new Date().toISOString()
-                });
-                alert("Cloud Sync Berhasil!");
-            } catch(e) { alert(e.message); }
-            btn.innerText = "SYNC CLOUD";
-        });
-
     </script>
 </body>
 </html>
