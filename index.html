@@ -3,166 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BRILink Manager Pro v4.1 Official</title>
+    <title>BRILink Manager Pro v4.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .active-tab { background: #1e40af !important; color: white !important; shadow: 0 10px 15px -3px rgba(30, 64, 175, 0.3); }
-        .page { display: none; animation: fadeIn 0.3s ease-out; }
+        .active-nav { background: #1e40af !important; color: white !important; shadow: 0 10px 15px -3px rgba(30, 64, 175, 0.3); }
+        .page { display: none; }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        input::-webkit-inner-spin-button { display: none; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen pb-24">
+<body class="bg-slate-50 flex flex-col md:flex-row min-h-screen">
 
-    <div id="modal-repay" class="fixed inset-0 z-[110] bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-white p-6 rounded-[2.5rem] w-full max-w-xs shadow-2xl">
-            <h3 class="text-center font-800 text-slate-800 mb-6 text-sm uppercase tracking-tighter">Terima Pembayaran</h3>
-            <div class="space-y-3" id="repay-actions"></div>
-            <button onclick="closeRepay()" class="w-full mt-6 text-slate-400 text-[10px] font-800 uppercase tracking-widest">Batal</button>
+    <aside class="hidden md:flex flex-col w-72 bg-slate-900 text-white p-6 sticky top-0 h-screen z-50">
+        <h1 id="sidebar-title" class="text-xl font-800 italic mb-10 text-blue-400">BRILink <span class="text-yellow-400">PRO</span></h1>
+        <nav class="space-y-2 flex-1">
+            <button onclick="nav('page-home')" class="nav-btn w-full flex items-center gap-4 p-4 text-xs font-800 rounded-2xl active-nav" data-id="page-home">
+                <i class="fas fa-cash-register"></i> MESIN KASIR
+            </button>
+            <button onclick="nav('page-history')" class="nav-btn w-full flex items-center gap-4 p-4 text-xs font-800 rounded-2xl text-slate-400" data-id="page-history">
+                <i class="fas fa-list-ul"></i> RIWAYAT & LABA
+            </button>
+            <button onclick="nav('page-debt')" class="nav-btn w-full flex items-center gap-4 p-4 text-xs font-800 rounded-2xl text-slate-400" data-id="page-debt">
+                <i class="fas fa-user-clock"></i> MANAJEMEN HUTANG
+            </button>
+            <button onclick="nav('page-account')" class="nav-btn w-full flex items-center gap-4 p-4 text-xs font-800 rounded-2xl text-slate-400" data-id="page-account">
+                <i class="fas fa-store"></i> PENGATURAN AGEN
+            </button>
+        </nav>
+        <div class="mt-auto pt-6 border-t border-slate-800">
+            <button id="btn-end-session-side" class="w-full bg-red-500/10 text-red-500 p-4 rounded-2xl text-[10px] font-800 uppercase hover:bg-red-500 hover:text-white transition-all">Akhiri Sesi</button>
         </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col min-w-0">
+        
+        <header class="bg-white border-b sticky top-0 z-40 p-4 md:p-6 shadow-sm">
+            <div class="max-w-7xl mx-auto space-y-4">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <button id="btn-sync-manual" class="flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all active:scale-95 bg-white border-slate-200">
+                            <div id="sync-dot" class="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+                            <span id="sync-text" class="text-[9px] font-900 text-slate-500 uppercase tracking-tighter">Synced</span>
+                            <i class="fas fa-cloud-upload-alt text-slate-400 text-[10px]"></i>
+                        </button>
+                        <h2 id="mobile-title" class="md:hidden text-sm font-900 text-blue-900 italic uppercase">BRILink Pro</h2>
+                    </div>
+                    <button onclick="exportToExcel()" class="bg-slate-50 text-slate-600 p-2.5 px-4 rounded-xl text-[10px] font-800 uppercase border border-slate-200"><i class="fas fa-file-excel mr-1 text-green-600"></i> Export XLS</button>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+                    <div class="bg-blue-600 p-3 rounded-xl text-white">
+                        <p class="text-[7px] font-bold opacity-70 uppercase">Laci</p>
+                        <h3 id="stat-laci" class="text-[11px] font-800">Rp 0</h3>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-slate-200">
+                        <p class="text-[7px] font-bold text-slate-400 uppercase">BRI</p>
+                        <h3 id="stat-bri" class="text-[11px] font-800 text-blue-700">Rp 0</h3>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-slate-200">
+                        <p class="text-[7px] font-bold text-slate-400 uppercase">DANA</p>
+                        <h3 id="stat-dana" class="text-[11px] font-800 text-sky-600">Rp 0</h3>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-slate-200">
+                        <p class="text-[7px] font-bold text-slate-400 uppercase">Pulsa</p>
+                        <h3 id="stat-pulsa" class="text-[11px] font-800 text-orange-600">Rp 0</h3>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded-xl border border-red-100">
+                        <p class="text-[7px] font-bold text-red-400 uppercase">Hutang</p>
+                        <h3 id="stat-hutang" class="text-[11px] font-800 text-red-600">Rp 0</h3>
+                    </div>
+                    <div class="bg-green-50 p-3 rounded-xl border border-green-100">
+                        <p class="text-[7px] font-bold text-green-400 uppercase">Laba Sesi</p>
+                        <h3 id="stat-laba-sesi" class="text-[11px] font-800 text-green-700">Rp 0</h3>
+                    </div>
+                    <div class="bg-slate-900 p-3 rounded-xl text-white">
+                        <p class="text-[7px] font-bold opacity-60 uppercase text-yellow-400">Laba Total</p>
+                        <h3 id="stat-laba-total" class="text-[11px] font-800">Rp 0</h3>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="p-4 md:p-8 flex-1 overflow-y-auto pb-24 md:pb-8">
+            <div id="page-home" class="page active max-w-2xl mx-auto">
+                 <div class="bg-white p-6 md:p-10 rounded-[2.5rem] shadow-sm border">
+                    <div class="flex gap-2 mb-8 bg-slate-100 p-1 rounded-2xl">
+                        <button onclick="setType('TRANSFER')" id="t-TRANSFER" class="flex-1 py-3 text-[10px] font-800 rounded-xl transition-all bg-white shadow text-blue-600">TRANSFER</button>
+                        <button onclick="setType('TARIK')" id="t-TARIK" class="flex-1 py-3 text-[10px] font-800 rounded-xl transition-all text-slate-400">TARIK</button>
+                        <button onclick="setType('PULSA')" id="t-PULSA" class="flex-1 py-3 text-[10px] font-800 rounded-xl transition-all text-slate-400">PULSA</button>
+                    </div>
+                    <div class="space-y-5">
+                        <div id="box-standard">
+                            <label class="text-[10px] font-800 text-slate-400 ml-3 uppercase">Nominal</label>
+                            <input type="number" id="inp-nom" placeholder="0" class="w-full p-4 bg-slate-50 rounded-2xl text-2xl font-800 border-none outline-none focus:ring-2 ring-blue-100">
+                        </div>
+                        <div id="box-admin" class="grid grid-cols-2 gap-4">
+                            <input type="number" id="inp-adm" value="5000" class="p-4 bg-slate-50 border rounded-2xl font-bold">
+                            <input type="number" id="inp-bia" value="3000" class="p-4 bg-slate-50 border rounded-2xl font-bold">
+                        </div>
+                        <div id="box-pulsa" class="hidden grid grid-cols-2 gap-4">
+                            <input type="number" id="inp-mod" placeholder="Modal" class="p-4 bg-orange-50 border border-orange-100 rounded-2xl font-bold">
+                            <input type="number" id="inp-jual" placeholder="Jual" class="p-4 bg-green-50 border border-green-100 rounded-2xl font-bold">
+                        </div>
+                        <label class="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border cursor-pointer hover:bg-red-50">
+                            <input type="checkbox" id="inp-hutang" class="w-5 h-5 accent-red-600">
+                            <span class="text-xs font-800 text-slate-600 uppercase">Simpan Sebagai Hutang</span>
+                        </label>
+                        <button id="btn-save" class="w-full bg-blue-700 text-white font-800 py-5 rounded-2xl text-[11px] uppercase tracking-[0.2em] shadow-xl">Simpan Transaksi</button>
+                    </div>
+                 </div>
+            </div>
+
+            <div id="page-history" class="page max-w-3xl mx-auto space-y-3"></div>
+            <div id="page-debt" class="page max-w-3xl mx-auto space-y-3"></div>
+            <div id="page-account" class="page max-w-md mx-auto">
+                <div class="bg-white p-8 rounded-[2.5rem] border shadow-sm text-center">
+                    <h3 class="font-800 text-xs text-slate-400 mb-4 uppercase">Branding Agen</h3>
+                    <input type="text" id="set-title" placeholder="Nama Agen" class="w-full p-4 bg-slate-50 border rounded-xl text-center font-bold mb-4">
+                    <button onclick="saveTitle()" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-xs uppercase">Simpan Perubahan</button>
+                </div>
+            </div>
+        </main>
+
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-3 z-50 rounded-t-3xl shadow-2xl">
+            <button onclick="nav('page-home')" class="nav-btn-m flex flex-col items-center gap-1 p-2 text-blue-600" data-id="page-home"><i class="fas fa-cash-register"></i><span class="text-[7px] font-800">KASIR</span></button>
+            <button onclick="nav('page-history')" class="nav-btn-m flex flex-col items-center gap-1 p-2 text-slate-300" data-id="page-history"><i class="fas fa-list-ul"></i><span class="text-[7px] font-800">LAPORAN</span></button>
+            <button onclick="nav('page-debt')" class="nav-btn-m flex flex-col items-center gap-1 p-2 text-slate-300" data-id="page-debt"><i class="fas fa-user-clock"></i><span class="text-[7px] font-800">HUTANG</span></button>
+            <button onclick="nav('page-account')" class="nav-btn-m flex flex-col items-center gap-1 p-2 text-slate-300" data-id="page-account"><i class="fas fa-cog"></i><span class="text-[7px] font-800">AGEN</span></button>
+        </nav>
     </div>
 
-    <header class="bg-white border-b sticky top-0 z-50 p-4 md:p-6 shadow-sm">
-        <div class="max-w-7xl mx-auto space-y-6">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <h1 id="custom-title" class="text-xl font-800 italic text-blue-800 tracking-tighter">BRILink <span class="text-yellow-500 font-black">PRO</span></h1>
-                    
-                    <button id="btn-sync-manual" class="flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all active:scale-95 bg-white border-slate-200">
-                        <div id="sync-dot" class="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
-                        <span id="sync-text" class="text-[9px] font-900 text-slate-500 uppercase tracking-tighter">Synced</span>
-                        <i class="fas fa-cloud-upload-alt text-slate-400 text-[10px]"></i>
-                    </button>
-                </div>
-                
-                <div class="flex gap-2">
-                    <button onclick="exportToExcel()" class="bg-slate-50 text-slate-600 p-2.5 px-4 rounded-xl text-[10px] font-800 uppercase border border-slate-200"><i class="fas fa-file-excel mr-1 text-green-600"></i> Export</button>
-                    <button id="btn-end-session" class="bg-red-600 text-white p-2.5 px-4 rounded-xl text-[10px] font-800 uppercase shadow-lg shadow-red-100">Akhiri Sesi</button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                <div class="bg-blue-600 p-4 rounded-2xl text-white shadow-lg shadow-blue-100">
-                    <p class="text-[8px] font-bold opacity-70 uppercase tracking-widest">Laci (Cash)</p>
-                    <h3 id="stat-laci" class="text-xs font-800">Rp 0</h3>
-                </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                    <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Bank BRI</p>
-                    <h3 id="stat-bri" class="text-xs font-800 text-blue-700">Rp 0</h3>
-                </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                    <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">E-Wallet</p>
-                    <h3 id="stat-dana" class="text-xs font-800 text-sky-600">Rp 0</h3>
-                </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                    <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Pulsa</p>
-                    <h3 id="stat-pulsa" class="text-xs font-800 text-orange-600">Rp 0</h3>
-                </div>
-                <div class="bg-red-50 p-4 rounded-2xl border border-red-100 shadow-sm">
-                    <p class="text-[8px] font-bold text-red-400 uppercase tracking-widest text-center">Hutang</p>
-                    <h3 id="stat-hutang" class="text-xs font-800 text-red-600 text-center">Rp 0</h3>
-                </div>
-                <div class="bg-green-50 p-4 rounded-2xl border border-green-100 shadow-sm">
-                    <p class="text-[8px] font-bold text-green-400 uppercase tracking-widest text-center">Laba Sesi</p>
-                    <h3 id="stat-laba-sesi" class="text-xs font-800 text-green-700 text-center">Rp 0</h3>
-                </div>
-                <div class="bg-slate-900 p-4 rounded-2xl text-white shadow-lg shadow-slate-200">
-                    <p class="text-[8px] font-bold opacity-60 uppercase tracking-widest text-center">Laba Total</p>
-                    <h3 id="stat-laba-total" class="text-xs font-800 text-yellow-400 text-center">Rp 0</h3>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto p-4 md:p-8">
-        
-        <div id="page-home" class="page active max-w-2xl mx-auto">
-            <div class="bg-white p-6 md:p-10 rounded-[3rem] shadow-sm border border-slate-200">
-                <div class="flex gap-2 mb-8 bg-slate-100 p-1.5 rounded-2xl">
-                    <button onclick="setType('TRANSFER')" id="t-TRANSFER" class="flex-1 py-3 text-[10px] font-800 rounded-xl transition-all">TRANSFER</button>
-                    <button onclick="setType('TARIK')" id="t-TARIK" class="flex-1 py-3 text-[10px] font-800 rounded-xl transition-all text-slate-400">TARIK</button>
-                    <button onclick="setType('PULSA')" id="t-PULSA" class="flex-1 py-3 text-[10px] font-800 rounded-xl transition-all text-slate-400">PULSA</button>
-                </div>
-
-                <div class="space-y-6">
-                    <div id="box-standard">
-                        <label class="text-[10px] font-800 text-slate-400 ml-3 uppercase tracking-widest">Nominal Transaksi</label>
-                        <input type="number" id="inp-nom" placeholder="Rp 0" class="w-full p-5 bg-slate-50 rounded-[1.5rem] text-3xl font-800 border-2 border-transparent focus:border-blue-100 focus:bg-white outline-none transition-all">
-                    </div>
-                    
-                    <div id="box-admin" class="grid grid-cols-2 gap-4">
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-800 text-slate-400 ml-3 uppercase">Admin Cust</label>
-                            <input type="number" id="inp-adm" value="5000" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold outline-none focus:bg-white">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-800 text-slate-400 ml-3 uppercase">Biaya Bank</label>
-                            <input type="number" id="inp-bia" value="3000" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold outline-none focus:bg-white">
-                        </div>
-                    </div>
-
-                    <div id="box-pulsa" class="hidden grid grid-cols-2 gap-4">
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-800 text-orange-400 ml-3 uppercase">Harga Modal</label>
-                            <input type="number" id="inp-mod" value="0" class="w-full p-4 bg-orange-50 border border-orange-100 rounded-2xl font-800 outline-none">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-800 text-green-400 ml-3 uppercase">Harga Jual</label>
-                            <input type="number" id="inp-jual" value="0" class="w-full p-4 bg-green-50 border border-green-100 rounded-2xl font-800 outline-none">
-                        </div>
-                    </div>
-
-                    <label class="flex items-center gap-4 p-5 bg-slate-50 rounded-[1.5rem] border border-dashed border-slate-300 cursor-pointer hover:bg-red-50 transition-all">
-                        <input type="checkbox" id="inp-hutang" class="w-6 h-6 rounded-lg accent-red-600">
-                        <div class="flex flex-col">
-                            <span class="text-[11px] font-800 text-slate-700 uppercase tracking-tighter">Simpan Sebagai Hutang</span>
-                            <span class="text-[9px] text-slate-400 font-bold uppercase">Uang belum diterima/piutang</span>
-                        </div>
-                    </label>
-
-                    <button id="btn-save" class="w-full bg-blue-700 text-white font-800 py-6 rounded-[1.5rem] text-xs uppercase tracking-[0.2em] shadow-2xl shadow-blue-200 active:scale-95 transition-all">Simpan Transaksi</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="page-history" class="page max-w-3xl mx-auto space-y-3"></div>
-
-        <div id="page-debt" class="page max-w-3xl mx-auto space-y-3"></div>
-
-        <div id="page-account" class="page max-w-md mx-auto">
-            <div class="bg-white p-8 rounded-[3rem] shadow-sm border space-y-6 text-center">
-                <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-3xl flex items-center justify-center mx-auto text-3xl">
-                    <i class="fas fa-store"></i>
-                </div>
-                <div>
-                    <h3 class="font-800 uppercase text-xs tracking-widest text-slate-400 mb-4">Branding Agen</h3>
-                    <input type="text" id="set-title" placeholder="Nama Agen BRILink Anda" class="w-full p-5 bg-slate-50 border rounded-2xl font-800 text-center outline-none focus:ring-4 ring-blue-50">
-                </div>
-                <button onclick="saveTitle()" class="w-full bg-slate-900 text-white font-800 py-4 rounded-2xl uppercase text-[10px] tracking-widest shadow-xl">Update Nama Agen</button>
-            </div>
-        </div>
-    </main>
-
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t flex justify-around p-4 z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-        <button onclick="nav('page-home')" id="n-page-home" class="flex flex-col items-center gap-1.5 p-3 px-6 rounded-2xl text-slate-400 transition-all">
-            <i class="fas fa-cash-register"></i><span class="text-[8px] font-800 uppercase">Kasir</span>
-        </button>
-        <button onclick="nav('page-history')" id="n-page-history" class="flex flex-col items-center gap-1.5 p-3 px-6 rounded-2xl text-slate-400 transition-all">
-            <i class="fas fa-list-ul"></i><span class="text-[8px] font-800 uppercase">Laporan</span>
-        </button>
-        <button onclick="nav('page-debt')" id="n-page-debt" class="flex flex-col items-center gap-1.5 p-3 px-6 rounded-2xl text-slate-400 transition-all">
-            <i class="fas fa-user-clock"></i><span class="text-[8px] font-800 uppercase">Hutang</span>
-        </button>
-        <button onclick="nav('page-account')" id="n-page-account" class="flex flex-col items-center gap-1.5 p-3 px-6 rounded-2xl text-slate-400 transition-all">
-            <i class="fas fa-cog"></i><span class="text-[8px] font-800 uppercase">Agen</span>
-        </button>
-    </nav>
+    <div id="modal-repay" class="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-[2rem] w-full max-w-xs"><div id="repay-actions" class="space-y-3"></div><button onclick="closeRepay()" class="w-full mt-4 text-[10px] font-bold text-slate-400 uppercase">Batal</button></div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -186,39 +163,31 @@
         let activeType = 'TRANSFER';
         let isSynced = true;
         let state = JSON.parse(localStorage.getItem('brilink_v4_local')) || {
-            title: "BRILink <span class='text-yellow-500 font-black'>PRO</span>",
+            title: "BRILink <span class='text-yellow-400'>PRO</span>",
             saldo: { laci: 0, bri: 0, dana: 0, pulsa: 0, hutang: 0 },
-            logs: [],
-            laba_total: 0
+            logs: [], laba_total: 0
         };
 
-        // UI SYNC STATUS INDICATOR
-        function setSyncIndicator(status) {
-            const dot = document.getElementById('sync-dot');
-            const text = document.getElementById('sync-text');
-            const btn = document.getElementById('btn-sync-manual');
-
-            if(status === 'PENDING') {
-                isSynced = false;
-                dot.className = "w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]";
-                text.innerText = "Need Sync";
-                text.className = "text-[9px] font-900 text-red-600 uppercase tracking-tighter";
-                btn.classList.add('border-red-200', 'bg-red-50');
-            } else {
-                isSynced = true;
-                dot.className = "w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]";
-                text.innerText = "Synced";
-                text.className = "text-[9px] font-900 text-slate-500 uppercase tracking-tighter";
-                btn.classList.remove('border-red-200', 'bg-red-50');
-            }
-        }
-
-        // NAVIGATION
+        // NAV FUNCTION
         window.nav = (id) => {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-tab'));
             document.getElementById(id).classList.add('active');
-            document.getElementById('n-'+id).classList.add('active-tab');
+            
+            // Desktop Nav Update
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('active-nav');
+                if(b.dataset.id === id) b.classList.add('active-nav');
+            });
+
+            // Mobile Nav Update
+            document.querySelectorAll('.nav-btn-m').forEach(b => {
+                b.classList.remove('text-blue-600');
+                b.classList.add('text-slate-300');
+                if(b.dataset.id === id) {
+                    b.classList.add('text-blue-600');
+                    b.classList.remove('text-slate-300');
+                }
+            });
             renderUI();
         };
 
@@ -227,16 +196,29 @@
             document.getElementById('box-standard').style.display = type === 'PULSA' ? 'none' : 'block';
             document.getElementById('box-admin').style.display = type === 'PULSA' ? 'none' : 'grid';
             document.getElementById('box-pulsa').style.display = type === 'PULSA' ? 'grid' : 'none';
-            document.querySelectorAll('#page-home button[id^="t-"]').forEach(b => {
-                b.className = b.id === 't-'+type ? 'flex-1 py-3 text-[10px] font-800 rounded-xl bg-blue-600 text-white shadow-lg' : 'flex-1 py-3 text-[10px] font-800 rounded-xl text-slate-400';
+            document.querySelectorAll('#t-TRANSFER, #t-TARIK, #t-PULSA').forEach(b => {
+                b.className = b.id === 't-'+type ? 'flex-1 py-3 text-[10px] font-800 rounded-xl bg-white shadow text-blue-600' : 'flex-1 py-3 text-[10px] font-800 rounded-xl text-slate-400';
             });
         };
 
-        // SAVE LOGIC
+        function setSyncStatus(status) {
+            const dot = document.getElementById('sync-dot');
+            const text = document.getElementById('sync-text');
+            if(status === 'PENDING') {
+                isSynced = false;
+                dot.className = "w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]";
+                text.innerText = "Need Sync";
+            } else {
+                isSynced = true;
+                dot.className = "w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]";
+                text.innerText = "Synced";
+            }
+        }
+
         document.getElementById('btn-save').addEventListener('click', () => {
             const isH = document.getElementById('inp-hutang').checked;
-            let nom = 0, laba = 0, adm = 0;
-
+            let nom = 0, laba = 0;
+            
             if(activeType === 'PULSA') {
                 const mod = parseFloat(document.getElementById('inp-mod').value) || 0;
                 const jual = parseFloat(document.getElementById('inp-jual').value) || 0;
@@ -245,144 +227,88 @@
                 if(!isH) state.saldo.laci += jual;
             } else {
                 nom = parseFloat(document.getElementById('inp-nom').value) || 0;
-                adm = parseFloat(document.getElementById('inp-adm').value) || 0;
+                const adm = parseFloat(document.getElementById('inp-adm').value) || 0;
                 const bia = parseFloat(document.getElementById('inp-bia').value) || 0;
-                if(activeType === 'TRANSFER') {
-                    laba = adm - bia;
-                    state.saldo.bri -= (nom + bia);
-                    if(!isH) state.saldo.laci += (nom + adm);
-                } else {
-                    laba = adm;
-                    state.saldo.bri += nom;
-                    state.saldo.laci -= (nom - adm);
-                }
+                if(activeType === 'TRANSFER') { laba = adm - bia; state.saldo.bri -= (nom+bia); if(!isH) state.saldo.laci += (nom+adm); }
+                else { laba = adm; state.saldo.bri += nom; state.saldo.laci -= (nom-adm); }
             }
 
-            if(isH) state.saldo.hutang += (activeType === 'TRANSFER' ? nom + adm : nom);
+            if(isH) state.saldo.hutang += nom;
             state.laba_total += laba;
-
-            state.logs.push({
-                id: Date.now(),
-                type: activeType,
-                nom, laba, isH,
-                waktu: new Date().toLocaleString('id-ID'),
-                petugas: auth.currentUser?.email || 'OFFLINE'
-            });
-
-            setSyncIndicator('PENDING');
+            state.logs.push({ id: Date.now(), type: activeType, nom, laba, isH, waktu: new Date().toLocaleString('id-ID') });
+            setSyncStatus('PENDING');
             saveLocal();
-            alert("Transaksi Berhasil!");
         });
 
-        // SYNC MANUAL
         document.getElementById('btn-sync-manual').addEventListener('click', async () => {
-            if(!auth.currentUser) return alert("Silahkan Login!");
-            document.getElementById('sync-text').innerText = "Syncing...";
+            if(!auth.currentUser) return;
             try {
                 await update(ref(rtdb, 'v4/' + auth.currentUser.uid), state);
-                setSyncIndicator('DONE');
-            } catch (e) {
-                alert("Gagal Sinkron: " + e.message);
-                setSyncIndicator('PENDING');
-            }
+                setSyncStatus('DONE');
+            } catch (e) { alert("Error: " + e.message); }
         });
 
-        // REPAYMENT
         window.openRepay = (id, amount) => {
-            const modal = document.getElementById('modal-repay');
             const actions = document.getElementById('repay-actions');
-            modal.style.display = 'flex';
+            document.getElementById('modal-repay').style.display = 'flex';
             actions.innerHTML = `
-                <button onclick="confirmRepay(${id}, ${amount}, 'laci')" class="w-full bg-slate-900 text-white p-5 rounded-2xl text-[10px] font-800 uppercase tracking-widest">Tunai ke Laci</button>
-                <button onclick="confirmRepay(${id}, ${amount}, 'bri')" class="w-full bg-blue-600 text-white p-5 rounded-2xl text-[10px] font-800 uppercase tracking-widest">Saldo ke BRI</button>
-                <button onclick="confirmRepay(${id}, ${amount}, 'dana')" class="w-full bg-sky-500 text-white p-5 rounded-2xl text-[10px] font-800 uppercase tracking-widest">Saldo ke DANA</button>
+                <button onclick="confirmRepay(${id}, ${amount}, 'laci')" class="w-full bg-slate-900 text-white p-5 rounded-xl font-bold uppercase text-[10px]">Tunai Ke Laci</button>
+                <button onclick="confirmRepay(${id}, ${amount}, 'bri')" class="w-full bg-blue-600 text-white p-5 rounded-xl font-bold uppercase text-[10px]">Saldo Ke BRI</button>
             `;
         };
 
         window.confirmRepay = (id, amount, target) => {
             const idx = state.logs.findIndex(l => l.id === id);
-            if(idx !== -1) {
-                state.saldo[target] += amount;
-                state.saldo.hutang -= amount;
-                state.logs[idx].isH = false;
-                state.logs[idx].type += " (LUNAS)";
-                document.getElementById('modal-repay').style.display = 'none';
-                setSyncIndicator('PENDING');
-                saveLocal();
-            }
+            state.saldo[target] += amount; state.saldo.hutang -= amount;
+            state.logs[idx].isH = false; state.logs[idx].type += " (LUNAS)";
+            document.getElementById('modal-repay').style.display = 'none';
+            setSyncStatus('PENDING'); saveLocal();
         };
 
         window.closeRepay = () => document.getElementById('modal-repay').style.display = 'none';
-
-        window.exportToExcel = () => {
-            const data = state.logs.map(l => ({ Waktu: l.waktu, Tipe: l.type, Nominal: l.nom, Laba: l.laba, Status: l.isH ? 'HUTANG' : 'LUNAS' }));
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Laporan");
-            XLSX.writeFile(wb, `Kasir_${new Date().toLocaleDateString()}.xlsx`);
-        };
-
-        window.saveTitle = () => {
-            state.title = document.getElementById('set-title').value;
-            saveLocal();
-            alert("Judul Updated!");
-        };
 
         function saveLocal() {
             localStorage.setItem('brilink_v4_local', JSON.stringify(state));
             renderUI();
         }
 
+        window.saveTitle = () => { state.title = document.getElementById('set-title').value; saveLocal(); };
+
         function renderUI() {
-            document.getElementById('custom-title').innerHTML = state.title;
+            document.getElementById('sidebar-title').innerHTML = state.title;
             document.getElementById('stat-laci').innerText = "Rp " + state.saldo.laci.toLocaleString();
             document.getElementById('stat-bri').innerText = "Rp " + state.saldo.bri.toLocaleString();
             document.getElementById('stat-dana').innerText = "Rp " + state.saldo.dana.toLocaleString();
             document.getElementById('stat-pulsa').innerText = "Rp " + state.saldo.pulsa.toLocaleString();
             document.getElementById('stat-hutang').innerText = "Rp " + state.saldo.hutang.toLocaleString();
             document.getElementById('stat-laba-total').innerText = "Rp " + state.laba_total.toLocaleString();
-            
-            const labaSesi = state.logs.reduce((a, b) => a + b.laba, 0);
-            document.getElementById('stat-laba-sesi').innerText = "Rp " + labaSesi.toLocaleString();
+            document.getElementById('stat-laba-sesi').innerText = "Rp " + state.logs.reduce((a,b)=>a+b.laba, 0).toLocaleString();
 
             const hist = document.getElementById('page-history');
             hist.innerHTML = state.logs.slice().reverse().map(l => `
-                <div class="bg-white p-5 rounded-2xl border flex justify-between items-center shadow-sm">
-                    <div>
-                        <p class="text-[9px] font-800 ${l.isH ? 'text-red-400' : 'text-slate-400'} uppercase leading-none mb-1">${l.type}</p>
-                        <h4 class="text-sm font-800 text-slate-800 italic">Rp ${l.nom.toLocaleString()}</h4>
-                        <p class="text-[8px] font-bold text-slate-300 uppercase">${l.waktu}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[8px] font-bold text-slate-400 uppercase">Untung</p>
-                        <p class="text-xs font-800 text-green-600">Rp ${l.laba.toLocaleString()}</p>
-                    </div>
+                <div class="bg-white p-4 rounded-2xl border flex justify-between items-center shadow-sm">
+                    <div><p class="text-[9px] font-800 text-slate-400 uppercase">${l.type}</p><h4 class="text-sm font-800">Rp ${l.nom.toLocaleString()}</h4></div>
+                    <div class="text-right"><p class="text-[8px] font-bold text-slate-400">LABA</p><p class="text-xs font-800 text-green-600">Rp ${l.laba.toLocaleString()}</p></div>
                 </div>
             `).join('');
 
-            const debtList = document.getElementById('page-debt');
-            const activeDebts = state.logs.filter(l => l.isH);
-            debtList.innerHTML = activeDebts.length ? activeDebts.map(d => `
-                <div class="bg-white p-5 rounded-2xl border-l-4 border-l-red-500 flex justify-between items-center shadow-sm">
-                    <div>
-                        <p class="text-[9px] font-800 text-red-500 uppercase">${d.type}</p>
-                        <h4 class="text-sm font-800 text-slate-800 italic">Rp ${d.nom.toLocaleString()}</h4>
-                    </div>
-                    <button onclick="openRepay(${d.id}, ${d.nom})" class="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-[10px] font-800 uppercase tracking-widest shadow-lg">Bayar</button>
+            const debt = document.getElementById('page-debt');
+            const dList = state.logs.filter(l => l.isH);
+            debt.innerHTML = dList.length ? dList.map(d => `
+                <div class="bg-white p-4 rounded-2xl border-l-4 border-l-red-500 flex justify-between items-center shadow-sm">
+                    <div><p class="text-[9px] font-800 text-red-500 uppercase">${d.type}</p><h4 class="text-sm font-800">Rp ${d.nom.toLocaleString()}</h4></div>
+                    <button onclick="openRepay(${d.id}, ${d.nom})" class="bg-slate-900 text-white px-5 py-2 rounded-xl text-[10px] font-bold">BAYAR</button>
                 </div>
-            `).join('') : '<div class="text-center py-20 text-slate-300 font-800 uppercase text-[10px] tracking-widest">Belum ada hutang</div>';
+            `).join('') : '<p class="text-center py-20 text-slate-300 text-[10px] font-bold">KOSONG</p>';
         }
 
-        document.getElementById('btn-end-session').addEventListener('click', () => {
-            if(!isSynced) return alert("❌ GAGAL! Sesi tidak bisa diakhiri sebelum data tersinkron ke Cloud. Klik tombol 'NEED SYNC' di atas.");
-            if(confirm("Yakin ingin tutup sesi? Data lokal akan dibersihkan.")) {
-                localStorage.removeItem('brilink_v4_local');
-                location.reload();
-            }
-        });
+        const endSession = () => {
+            if(!isSynced) return alert("Upload data dulu!");
+            if(confirm("Tutup Kasir?")) { localStorage.removeItem('brilink_v4_local'); location.reload(); }
+        };
+        document.getElementById('btn-end-session-side').addEventListener('click', endSession);
 
         onAuthStateChanged(auth, (user) => { if(user) renderUI(); });
-        setType('TRANSFER'); nav('page-home');
     </script>
 </body>
 </html>
